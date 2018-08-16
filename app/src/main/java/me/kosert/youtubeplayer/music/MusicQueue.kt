@@ -11,7 +11,10 @@ object MusicQueue {
     private val queue = mutableListOf<Song>()
 
     var currentState: State = State.STOPPED
-        private set
+        private set(value) {
+            field = value
+            bus.post(PlayingStateEvent(currentState))
+        }
 
     fun addSong(song: Song) {
         queue.add(song)
@@ -31,12 +34,10 @@ object MusicQueue {
 
     fun onPaused() {
         currentState = State.PAUSED
-        //TODO
     }
 
     fun onStopped() {
         currentState = State.STOPPED
-        //TODO
     }
 }
 

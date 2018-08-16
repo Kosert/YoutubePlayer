@@ -5,29 +5,29 @@ import android.os.Bundle
 import com.squareup.otto.Subscribe
 import kotlinx.android.synthetic.main.activity_main.*
 import me.kosert.youtubeplayer.Conf
-import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.R
 import me.kosert.youtubeplayer.music.MusicQueue
+import me.kosert.youtubeplayer.network.Network
 import me.kosert.youtubeplayer.network.NetworkResponseEvent
+import me.kosert.youtubeplayer.network.requests.GetInfoRequest
 import me.kosert.youtubeplayer.network.responses.GetInfoResponse
+import me.kosert.youtubeplayer.service.Song
 import me.kosert.youtubeplayer.ui.activities.AbstractActivity
-import me.kosert.youtubeplayer.webview.ChromeClient
-import me.kosert.youtubeplayer.webview.WebClient
+import me.kosert.youtubeplayer.ui.activities.main.webview.ChromeClient
+import me.kosert.youtubeplayer.ui.activities.main.webview.WebClient
 
-class MainActivity : AbstractActivity()
+class MainActivity : AbstractActivity(), MainActivityCallbacks
 {
-
-	@SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         webView.settings.mediaPlaybackRequiresUserGesture = true
         webView.settings.javaScriptEnabled = true
-        webView.webChromeClient = ChromeClient(webView)
-        webView.webViewClient = WebClient(webView)
+        webView.webChromeClient = ChromeClient(this)
+        webView.webViewClient = WebClient()
         webView.loadUrl(Conf.YOUTUBE_URL)
-
     }
 
     override fun onBackPressed() {
@@ -35,6 +35,11 @@ class MainActivity : AbstractActivity()
             webView.goBack()
         else
             super.onBackPressed()
+    }
+
+    override fun onVideoClicked() {
+        val request = GetInfoRequest(webView.url)
+        Network.send(request)
     }
 
     @Subscribe
@@ -49,7 +54,8 @@ class MainActivity : AbstractActivity()
 
         if (audioFormats.isNotEmpty()) {
             val format = audioFormats[0]
-            //TODO MusicQueue.addSong()
+            val song = Song(response.title, response.url, format)
+            MusicQueue.addSong(song)
         }
         else {
             showSnack("No suitable format :(")

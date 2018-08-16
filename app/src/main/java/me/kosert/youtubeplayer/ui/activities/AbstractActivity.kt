@@ -10,7 +10,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import com.squareup.otto.Subscribe
 import me.kosert.youtubeplayer.GlobalProvider
-import me.kosert.youtubeplayer.events.ShutdownEvent
+import me.kosert.youtubeplayer.receivers.ShutdownEvent
 import me.kosert.youtubeplayer.ui.dialogs.ProgressDialog
 import me.kosert.youtubeplayer.util.Logger
 

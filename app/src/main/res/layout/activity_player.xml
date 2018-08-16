@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/red"
+        app:titleTextColor="@color/white"
+        android:elevation="4dp"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar"
+        android:layout_marginBottom="102dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="8dp"
+        android:paddingTop="8dp"
+        android:background="@color/grayLight"
+        android:clipToPadding="true"
+        android:elevation="8dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/currentTimeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0:00" />
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="0dp"
+                android:layout_height="20dp"
+                android:layout_weight="1"
+                android:progress="50" />
+
+            <TextView
+                android:id="@+id/lengthText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3:30" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp">
+
+            <ImageView
+                android:id="@+id/stopButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/circle_border"
+                android:src="@drawable/ic_stop_black_24dp" />
+
+            <ImageView
+                android:id="@+id/playPauseButton"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/circle_border"
+                android:src="@drawable/ic_play_arrow_black_24dp" />
+
+            <ImageView
+                android:id="@+id/nextButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/circle_border"
+                android:src="@drawable/ic_skip_next_black_24dp" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+</RelativeLayout>

@@ -15,7 +15,6 @@ import me.kosert.youtubeplayer.network.requests.ParametrizedStringRequest
 import me.kosert.youtubeplayer.network.responses.GetInfoResponse
 
 
-//TODO ogarnąć kukizy
 object Network
 {
 	private const val baseUrl = Conf.KOSERT_URL

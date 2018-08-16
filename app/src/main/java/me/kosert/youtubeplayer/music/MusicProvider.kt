@@ -5,16 +5,16 @@ import me.kosert.youtubeplayer.service.Song
 object MusicProvider {
 
     fun isSongSaved(song: Song) : Boolean {
+        //TODO is song saved
         return false
-        TODO()
     }
 
     fun getSavedSong() {
-        TODO()
+        TODO("get saved song")
     }
 
     fun getSongUri(song: Song) : String {
         return song.format.url
-        TODO()
+        TODO("proxy the song and save")
     }
 }

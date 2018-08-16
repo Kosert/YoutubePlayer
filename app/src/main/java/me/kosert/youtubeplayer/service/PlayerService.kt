@@ -1,24 +1,25 @@
 package me.kosert.youtubeplayer.service
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
+import android.support.v4.content.ContextCompat
 import com.squareup.otto.Subscribe
 import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.R
 import me.kosert.youtubeplayer.music.MusicProvider
 import me.kosert.youtubeplayer.music.MusicQueue
+import me.kosert.youtubeplayer.music.PlayingStateEvent
 import me.kosert.youtubeplayer.music.State
-import me.kosert.youtubeplayer.receivers.SHUTDOWN_ACTION
 import me.kosert.youtubeplayer.ui.activities.player.PlayerActivity
 import me.kosert.youtubeplayer.util.Logger
 
@@ -42,7 +43,7 @@ class PlayerService : Service() {
         logger.i("Creating")
         bus.register(this)
 
-        createNotification()
+        startForeground(ONGOING_NOTIFICATION_ID, createNotification(MusicQueue.currentState))
     }
 
     override fun onDestroy() {
@@ -58,11 +59,16 @@ class PlayerService : Service() {
 
     @Subscribe
     fun onControlEvent(event: ControlEvent) {
-        when(event.type) {
+        when (event.type) {
             OperationType.PLAY -> play()
             OperationType.PAUSE -> pause()
             else -> TODO()
         }
+    }
+
+    @Subscribe
+    fun onPlayingStateChange(event: PlayingStateEvent) {
+        updateNotification()
     }
 
     private fun play() {
@@ -76,9 +82,8 @@ class PlayerService : Service() {
 
         val song = MusicQueue.getFirst() ?: return
         if (MusicProvider.isSongSaved(song)) {
-            //TODO
-        }
-        else {
+            //TODO if song is saved
+        } else {
             val uri = MusicProvider.getSongUri(song)
 
             val audioAttributes = AudioAttributes.Builder()
@@ -109,7 +114,14 @@ class PlayerService : Service() {
         play()
     }
 
-    private fun createNotification() {
+    private fun updateNotification() {
+        val notification = createNotification(MusicQueue.currentState)
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(ONGOING_NOTIFICATION_ID, notification)
+    }
+
+    private fun createNotification(state: State): Notification {
         val notificationIntent = Intent(this, PlayerActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
 
@@ -123,20 +135,41 @@ class PlayerService : Service() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        val exitIntent = Intent(SHUTDOWN_ACTION)
-        val pendingExitIntent = PendingIntent.getBroadcast(this, 0, exitIntent, 0)
+        val exitAction = run {
+            val exitIntent = Intent(GlobalProvider.SHUTDOWN_ACTION)
+            val pendingExitIntent = PendingIntent.getBroadcast(this, 0, exitIntent, 0)
+            NotificationCompat.Action.Builder(R.drawable.ic_close_black_24dp, "Exit", pendingExitIntent).build()
+        }
+        val stopAction = run {
+            val stopIntent = Intent(GlobalProvider.STOP_ACTION)
+            val pendingStopIntent = PendingIntent.getBroadcast(this, 0, stopIntent, 0)
+            NotificationCompat.Action.Builder(R.drawable.ic_stop_black_24dp, "Stop", pendingStopIntent).build()
+        }
 
+        val playPauseAction = if (state == State.PLAYING) {
+            val pauseIntent = Intent(GlobalProvider.PAUSE_ACTION)
+            val pendingPauseIntent = PendingIntent.getBroadcast(this, 0, pauseIntent, 0)
+            NotificationCompat.Action.Builder(R.drawable.ic_pause_black_24dp, "Pause", pendingPauseIntent).build()
+        } else {
+            val playIntent = Intent(GlobalProvider.PLAY_ACTION)
+            val pendingPlayIntent = PendingIntent.getBroadcast(this, 0, playIntent, 0)
+            NotificationCompat.Action.Builder(R.drawable.ic_play_arrow_black_24dp, "Play", pendingPlayIntent).build()
+        }
 
-        val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+        //TODO skip forward action
+
+        val drawable = getDrawable(R.mipmap.ic_launcher) as BitmapDrawable
+
+        return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText("Player is running")
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_youtubes)
+                .setLargeIcon(drawable.bitmap)
                 .setContentIntent(pendingIntent)
-                .addAction(R.drawable.ic_close_black_24dp, "Exit", pendingExitIntent)
-                //TODO buttons: .addAction()
+                .addAction(playPauseAction)
+                .addAction(stopAction)
+                .addAction(exitAction)
                 .build()
-
-        startForeground(ONGOING_NOTIFICATION_ID, notification)
     }
 
     companion object {

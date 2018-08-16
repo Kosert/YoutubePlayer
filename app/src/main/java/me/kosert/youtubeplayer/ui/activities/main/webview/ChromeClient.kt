@@ -1,12 +1,15 @@
-package me.kosert.youtubeplayer.webview
+package me.kosert.youtubeplayer.ui.activities.main.webview
 
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import me.kosert.youtubeplayer.network.Network
 import me.kosert.youtubeplayer.network.requests.GetInfoRequest
+import me.kosert.youtubeplayer.ui.activities.main.MainActivityCallbacks
 import me.kosert.youtubeplayer.util.Logger
 
-class ChromeClient(val webView: WebView) : WebChromeClient() {
+class ChromeClient(
+        val callbacks: MainActivityCallbacks
+) : WebChromeClient() {
 
     private val logger = Logger("ChromeClient")
 
@@ -18,13 +21,7 @@ class ChromeClient(val webView: WebView) : WebChromeClient() {
         if (view.url.contains("watch?v=")) {
             view.stopLoading()
 
-            val request = GetInfoRequest(view.url)
-            Network.send(request)
-
-            //val disableVideoScript = "document.getElementsByTagName('video')[0].src = ''"
-            //view.evaluateJavascript(disableVideoScript, {})
+            callbacks.onVideoClicked()
         }
-
-
     }
 }
