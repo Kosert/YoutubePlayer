@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">YoutubePlayer</string>
+
+    <string name="user_prefs_key">USER_PREFS_KEY</string>
+    <string name="app_data_key">APP_DATA_KEY</string>
+
+    <!-- Common Strings -->
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="empty_string"></string>
+
+    <!-- Errors -->
+    <string name="error">Error</string>
+    <string name="error_with_message">Error: %s</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="network_error">Network error</string>
+
+    <!-- ProgressDialog -->
+    <string name="please_wait">Please wait…</string>
+
+    <!-- MainActivity -->
+
+
+</resources>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="me.kosert.youtubeplayer">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name">
+        <activity
+            android:name=".ui.activities.splash.SplashScreenActivity"
+            android:noHistory="true"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.activities.main.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".ui.activities.player.PlayerActivity"
+            android:theme="@style/AppTheme" />
+
+        <service
+            android:name=".service.PlayerService"
+            android:exported="false" />
+
+        <receiver
+            android:name=".receivers.AppShutdownReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="me.kosert.youtubeplayer.SHUTDOWN"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receivers.ExternalControlReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receivers.ControlReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="me.kosert.youtubeplayer.PLAY"/>
+                <action android:name="me.kosert.youtubeplayer.PAUSE"/>
+                <action android:name="me.kosert.youtubeplayer.STOP"/>
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>
