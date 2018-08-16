@@ -2,6 +2,7 @@ package me.kosert.youtubeplayer.ui.activities.main
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import com.squareup.otto.Subscribe
 import kotlinx.android.synthetic.main.activity_main.*
 import me.kosert.youtubeplayer.Conf
@@ -38,6 +39,7 @@ class MainActivity : AbstractActivity(), MainActivityCallbacks
     }
 
     override fun onVideoClicked() {
+        showProgress(true)
         val request = GetInfoRequest(webView.url)
         Network.send(request)
     }
@@ -52,13 +54,16 @@ class MainActivity : AbstractActivity(), MainActivityCallbacks
             it.audioEncoding != null && it.audioEncoding != "opus" && it.encoding == null
         }.sortedByDescending { it.audioBitrate?.toInt() }
 
+        showProgress(false)
+        webView.goBack()
         if (audioFormats.isNotEmpty()) {
             val format = audioFormats[0]
             val song = Song(response.title, response.url, format)
             MusicQueue.addSong(song)
+            showSnack("ADDED TO QUEUE: " + response.title, Snackbar.LENGTH_LONG)
         }
         else {
-            showSnack("No suitable format :(")
+            showSnack("ERROR: No suitable audio format :(", Snackbar.LENGTH_LONG)
         }
     }
 }

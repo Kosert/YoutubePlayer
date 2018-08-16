@@ -7,6 +7,7 @@ import android.support.annotation.CallSuper
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
+import android.widget.TextView
 import android.widget.Toast
 import com.squareup.otto.Subscribe
 import me.kosert.youtubeplayer.GlobalProvider
@@ -56,11 +57,14 @@ abstract class AbstractActivity : AppCompatActivity(), IAbstractActivity {
     }
 
     override fun showSnack(text: String, length: Int) {
-        Snackbar.make(window.decorView.rootView, text, length).show()
+        val snackbar = Snackbar.make(window.decorView.findViewById(android.R.id.content), text, length)
+        val textView = snackbar.view.findViewById<TextView>(android.support.design.R.id.snackbar_text)
+        textView.maxLines = 1
+        snackbar.show()
     }
 
     override fun showSnack(resId: Int, length: Int) {
-        Snackbar.make(window.decorView.rootView, resId, length).show()
+        showSnack(getString(resId))
     }
 
     override fun showProgress(visible: Boolean) {

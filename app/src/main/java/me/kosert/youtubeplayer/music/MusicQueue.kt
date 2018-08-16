@@ -39,6 +39,10 @@ object MusicQueue {
     fun onStopped() {
         currentState = State.STOPPED
     }
+
+    fun onStarted() {
+        currentState = State.PLAYING
+    }
 }
 
 enum class State {

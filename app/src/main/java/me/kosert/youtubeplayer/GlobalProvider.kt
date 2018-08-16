@@ -3,6 +3,7 @@ package me.kosert.youtubeplayer
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.otto.Bus
+import com.squareup.otto.ThreadEnforcer
 
 object GlobalProvider {
 
@@ -11,10 +12,10 @@ object GlobalProvider {
     const val PAUSE_ACTION = "me.kosert.youtubeplayer.PAUSE"
     const val STOP_ACTION = "me.kosert.youtubeplayer.STOP"
 
-
+    //TODO HandlerThread map
 
     val bus by lazy {
-        Bus()
+        Bus(ThreadEnforcer.ANY)
     }
 
     val gson: Gson by lazy {

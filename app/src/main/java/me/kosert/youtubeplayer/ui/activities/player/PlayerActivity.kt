@@ -18,13 +18,15 @@ class PlayerActivity : AbstractActivity() {
         //TODO
         // buttons play/pause stop skip
         // recycler songs
-        // recycler item -> song number, title, length? moveable?
+        // recycler item -> song number, title, remove, length? moveable?
 
 
     }
 
     @Subscribe
     fun onPlayerStateChanged(event: PlayingStateEvent) {
+        handler.post {
 
+        }
     }
 }
