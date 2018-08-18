@@ -9,9 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
-import com.squareup.otto.Subscribe
 import me.kosert.youtubeplayer.GlobalProvider
-import me.kosert.youtubeplayer.receivers.ShutdownEvent
 import me.kosert.youtubeplayer.ui.dialogs.ProgressDialog
 import me.kosert.youtubeplayer.util.Logger
 
@@ -41,11 +39,6 @@ abstract class AbstractActivity : AppCompatActivity(), IAbstractActivity {
         super.onStop()
         flowLogger.i("onStop - ${this::class.java.simpleName}")
         bus.unregister(this)
-    }
-
-    @Subscribe
-    fun onShutdownEvent(event: ShutdownEvent) {
-        finishAndRemoveTask()
     }
 
     override fun showToast(text: String, length: Int) {

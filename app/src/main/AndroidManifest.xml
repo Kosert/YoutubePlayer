@@ -27,6 +27,8 @@
         <activity
             android:name=".ui.activities.player.PlayerActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.CloseActivity" />
 
         <service
             android:name=".service.PlayerService"
@@ -41,19 +43,13 @@
         </receiver>
 
         <receiver
-            android:name=".receivers.ExternalControlReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON"/>
-            </intent-filter>
-        </receiver>
-
-        <receiver
             android:name=".receivers.ControlReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="me.kosert.youtubeplayer.PLAY"/>
                 <action android:name="me.kosert.youtubeplayer.PAUSE"/>
                 <action android:name="me.kosert.youtubeplayer.STOP"/>
+                <action android:name="me.kosert.youtubeplayer.NEXT"/>
             </intent-filter>
         </receiver>
 

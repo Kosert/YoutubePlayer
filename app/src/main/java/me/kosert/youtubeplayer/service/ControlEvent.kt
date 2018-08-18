@@ -6,5 +6,7 @@ class ControlEvent(
 
 enum class OperationType {
     PLAY,
-    PAUSE
+    PAUSE,
+    STOP,
+    NEXT
 }

@@ -2,26 +2,30 @@ package me.kosert.youtubeplayer.ui.activities.main.webview
 
 import android.webkit.WebChromeClient
 import android.webkit.WebView
-import me.kosert.youtubeplayer.network.Network
-import me.kosert.youtubeplayer.network.requests.GetInfoRequest
 import me.kosert.youtubeplayer.ui.activities.main.MainActivityCallbacks
 import me.kosert.youtubeplayer.util.Logger
 
 class ChromeClient(
-        val callbacks: MainActivityCallbacks
+        private val callbacks: MainActivityCallbacks
 ) : WebChromeClient() {
 
     private val logger = Logger("ChromeClient")
+    private var lastUrl = ""
 
-    override fun onReceivedTitle(view: WebView, title: String?) {
-        super.onReceivedTitle(view, title)
+    override fun onProgressChanged(view: WebView, newProgress: Int) {
+        super.onProgressChanged(view, newProgress)
 
-        logger.i("Page title: $title - ${view.url}")
+        val newUrl = view.url
+        if (newUrl != lastUrl) {
+            lastUrl = newUrl
+            logger.i("Url changed - ${view.url} ($newProgress)")
 
-        if (view.url.contains("watch?v=")) {
-            view.stopLoading()
+            if (newUrl.contains("watch?v=")) {
+                view.stopLoading()
 
-            callbacks.onVideoClicked()
+                callbacks.onVideoClicked()
+            }
+
         }
     }
 }

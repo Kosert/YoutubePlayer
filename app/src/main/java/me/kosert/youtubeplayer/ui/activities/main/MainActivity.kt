@@ -1,6 +1,7 @@
 package me.kosert.youtubeplayer.ui.activities.main
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import com.squareup.otto.Subscribe
@@ -12,6 +13,7 @@ import me.kosert.youtubeplayer.network.Network
 import me.kosert.youtubeplayer.network.NetworkResponseEvent
 import me.kosert.youtubeplayer.network.requests.GetInfoRequest
 import me.kosert.youtubeplayer.network.responses.GetInfoResponse
+import me.kosert.youtubeplayer.service.PlayerService
 import me.kosert.youtubeplayer.service.Song
 import me.kosert.youtubeplayer.ui.activities.AbstractActivity
 import me.kosert.youtubeplayer.ui.activities.main.webview.ChromeClient
@@ -23,6 +25,9 @@ class MainActivity : AbstractActivity(), MainActivityCallbacks
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val intent = Intent(this, PlayerService::class.java)
+        startService(intent)
 
         webView.settings.mediaPlaybackRequiresUserGesture = true
         webView.settings.javaScriptEnabled = true
@@ -47,8 +52,6 @@ class MainActivity : AbstractActivity(), MainActivityCallbacks
     @Subscribe
     fun onNewNetworkEvent(event: NetworkResponseEvent) {
 
-        logger.d("Response: ${event.responseMessage.toString()}")
-
         val response = event.responseMessage as GetInfoResponse
         val audioFormats = response.formats.filter {
             it.audioEncoding != null && it.audioEncoding != "opus" && it.encoding == null
@@ -58,7 +61,7 @@ class MainActivity : AbstractActivity(), MainActivityCallbacks
         webView.goBack()
         if (audioFormats.isNotEmpty()) {
             val format = audioFormats[0]
-            val song = Song(response.title, response.url, format)
+            val song = Song(response.title, response.url, response.length, format)
             MusicQueue.addSong(song)
             showSnack("ADDED TO QUEUE: " + response.title, Snackbar.LENGTH_LONG)
         }

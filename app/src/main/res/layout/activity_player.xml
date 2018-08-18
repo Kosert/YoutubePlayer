@@ -15,6 +15,7 @@
         android:elevation="4dp"/>
 
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/songRecycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"
@@ -49,13 +50,13 @@
                 android:layout_width="0dp"
                 android:layout_height="20dp"
                 android:layout_weight="1"
-                android:progress="50" />
+                android:progress="0" />
 
             <TextView
                 android:id="@+id/lengthText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="3:30" />
+                tools:text="3:30" />
 
         </LinearLayout>
 

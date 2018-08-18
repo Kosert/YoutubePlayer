@@ -20,7 +20,10 @@ class ControlReceiver : BroadcastReceiver() {
                 bus.post(ControlEvent(OperationType.PAUSE))
             }
             GlobalProvider.STOP_ACTION -> {
-                //TODO bus.post(ControlEvent(OperationType.STOP))
+                bus.post(ControlEvent(OperationType.STOP))
+            }
+            GlobalProvider.NEXT_ACTION -> {
+                bus.post(ControlEvent(OperationType.NEXT))
             }
         }
     }

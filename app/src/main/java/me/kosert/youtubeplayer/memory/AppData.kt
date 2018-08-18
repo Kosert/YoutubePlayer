@@ -1,7 +1,7 @@
 package me.kosert.youtubeplayer.memory
 
 import me.kosert.youtubeplayer.R
-import me.kosert.youtubeplayer.memory.AbstractPrefs
+import me.kosert.youtubeplayer.service.Song
 
 object AppData : AbstractPrefs<AppData.BooleanType, AppData.IntType, AppData.StringType, AppData.AnyType>() {
 
@@ -25,7 +25,6 @@ object AppData : AbstractPrefs<AppData.BooleanType, AppData.IntType, AppData.Str
             override val prefKey: String,
             override val default: String
     ) : IStringPrefType {
-        LOGIN("LOGIN", ""),
 
     }
 
@@ -33,6 +32,6 @@ object AppData : AbstractPrefs<AppData.BooleanType, AppData.IntType, AppData.Str
             override val prefKey: String,
             override val default: Any
     ) : IAnyPrefType {
-
+        USER_PLAYLIST("USER_PLAYLIST", arrayOf<Song>())
     }
 }
