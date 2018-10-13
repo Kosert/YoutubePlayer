@@ -3,7 +3,10 @@
     package="me.kosert.youtubeplayer">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
 
     <application
         android:name=".App"
@@ -26,9 +29,10 @@
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".ui.activities.player.PlayerActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.CloseActivity" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTask"
+            />
+        <activity android:name=".ui.activities.CloseActivity" />
 
         <service
             android:name=".service.PlayerService"
@@ -38,7 +42,7 @@
             android:name=".receivers.AppShutdownReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="me.kosert.youtubeplayer.SHUTDOWN"/>
+                <action android:name="me.kosert.youtubeplayer.SHUTDOWN" />
             </intent-filter>
         </receiver>
 
@@ -46,10 +50,10 @@
             android:name=".receivers.ControlReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="me.kosert.youtubeplayer.PLAY"/>
-                <action android:name="me.kosert.youtubeplayer.PAUSE"/>
-                <action android:name="me.kosert.youtubeplayer.STOP"/>
-                <action android:name="me.kosert.youtubeplayer.NEXT"/>
+                <action android:name="me.kosert.youtubeplayer.PLAY" />
+                <action android:name="me.kosert.youtubeplayer.PAUSE" />
+                <action android:name="me.kosert.youtubeplayer.STOP" />
+                <action android:name="me.kosert.youtubeplayer.NEXT" />
             </intent-filter>
         </receiver>
 

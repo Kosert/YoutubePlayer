@@ -1,13 +1,56 @@
 package me.kosert.youtubeplayer.music
 
-import me.kosert.youtubeplayer.GlobalProvider
+import me.kosert.youtubeplayer.GlobalProvider.bus
 import me.kosert.youtubeplayer.memory.AppData
-import me.kosert.youtubeplayer.memory.AppData.AnyType.USER_PLAYLIST
-import me.kosert.youtubeplayer.service.ControlEvent
-import me.kosert.youtubeplayer.service.CurrentTimeEvent
-import me.kosert.youtubeplayer.service.OperationType
+import me.kosert.youtubeplayer.memory.AppData.AnyType.*
 import me.kosert.youtubeplayer.service.Song
+import java.util.*
 
+
+object MusicQueue {
+
+    val queue by lazy {
+        val array = AppData.getAny(USER_PLAYLIST) as Array<*>
+        val queue = mutableListOf<Song>()
+        array.forEach { queue.add(it as Song) }
+        queue
+    }
+
+    fun getIndex(song: Song): Int {
+        return queue.indexOfFirst { it.ytUrl == song.ytUrl }
+    }
+
+    fun addSong(song: Song) {
+        queue.add(song)
+        MusicProvider.fetchSongUri(song)
+        AppData.setAny(USER_PLAYLIST, queue.toTypedArray())
+        bus.post(QueueChangedEvent())
+    }
+
+    fun removeSong(position: Int) {
+        queue.removeAt(position)
+//        if (pointer > position)
+//            pointer--
+        AppData.setAny(USER_PLAYLIST, queue.toTypedArray())
+        bus.post(QueueChangedEvent())
+    }
+
+    fun swap(fromPosition: Int, toPosition: Int) {
+        if (fromPosition < toPosition) {
+            for (i in fromPosition until toPosition) {
+                Collections.swap(MusicQueue.queue, i, i + 1)
+            }
+        }
+        else {
+            for (i in fromPosition downTo toPosition + 1) {
+                Collections.swap(MusicQueue.queue, i, i - 1)
+            }
+        }
+        AppData.setAny(USER_PLAYLIST, queue.toTypedArray())
+    }
+}
+
+/*
 object MusicQueue {
 
     private val bus = GlobalProvider.bus
@@ -28,7 +71,7 @@ object MusicQueue {
     var currentState: State = State.STOPPED
         private set(value) {
             field = value
-            bus.post(PlayingStateEvent(currentState))
+            bus.post(StateEvent(currentState))
         }
 
     fun uninit() {
@@ -59,6 +102,10 @@ object MusicQueue {
 
     fun getCurrent(): Song? {
         return queue.getOrNull(pointer)
+    }
+
+    fun getNext(): Song? {
+        return queue.getOrNull(pointer + 1)
     }
 
     fun onFinishedPlaying() {
@@ -100,4 +147,4 @@ enum class State {
     PLAYING,
     PAUSED,
     STOPPED
-}
+}*/

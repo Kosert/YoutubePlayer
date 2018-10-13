@@ -7,13 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_song.view.*
 import me.kosert.youtubeplayer.App
+import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.R
-import me.kosert.youtubeplayer.music.MusicQueue
-import me.kosert.youtubeplayer.music.State
+import me.kosert.youtubeplayer.service.PlayingState
 import me.kosert.youtubeplayer.service.Song
 import java.text.DecimalFormat
 
-class SongAdapter(private val items: List<Song>) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
+class SongAdapter(
+        private val playerView: PlayerView,
+        private val items: List<Song>
+) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
         val inflatedView = LayoutInflater.from(parent.context).inflate(R.layout.item_song, parent, false)
@@ -26,7 +29,6 @@ class SongAdapter(private val items: List<Song>) : RecyclerView.Adapter<SongAdap
     override fun getItemCount() = items.size
 
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
-
         holder.bind(position)
     }
 
@@ -42,15 +44,15 @@ class SongAdapter(private val items: List<Song>) : RecyclerView.Adapter<SongAdap
 
             val song = items[position]
 
-            if (song.ytUrl == MusicQueue.getCurrent()?.ytUrl) {
+            if (song.ytUrl == GlobalProvider.currentState.song?.ytUrl) {
                 titleTextView.setTypeface(null, Typeface.BOLD)
 
-                when(MusicQueue.currentState) {
-                    State.PLAYING ->
+                when(GlobalProvider.currentState.state) {
+                    PlayingState.PLAYING ->
                         removeButton.setImageDrawable(App.get().getDrawable(R.drawable.ic_play_circle_outline_black_24dp))
-                    State.PAUSED ->
+                    PlayingState.PAUSED ->
                         removeButton.setImageDrawable(App.get().getDrawable(R.drawable.ic_pause_circle_outline_black_24dp))
-                    State.STOPPED ->
+                    PlayingState.STOPPED ->
                         removeButton.setImageDrawable(App.get().getDrawable(R.drawable.ic_close_black_24dp))
                 }
 
@@ -67,13 +69,16 @@ class SongAdapter(private val items: List<Song>) : RecyclerView.Adapter<SongAdap
         }
 
         val onClick = View.OnClickListener {
-            MusicQueue.onSongSelected(adapterPosition)
+            playerView.onSongSelected(adapterPosition)
         }
 
         val onRemoveClick = View.OnClickListener {
             val song = items[adapterPosition]
-            if (MusicQueue.currentState == State.STOPPED || song.ytUrl != MusicQueue.getCurrent()?.ytUrl)
-                MusicQueue.removeSong(adapterPosition)
+
+            if (GlobalProvider.currentState.state == PlayingState.STOPPED || song.ytUrl != GlobalProvider.currentState.song?.ytUrl) {
+                playerView.onSongRemoveClicked(adapterPosition)
+                song.getMusicFile().delete()
+            }
         }
     }
 }

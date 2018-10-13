@@ -18,7 +18,7 @@ object AppData : AbstractPrefs<AppData.BooleanType, AppData.IntType, AppData.Str
             override val prefKey: String,
             override val default: Int
     ) : IIntegerPrefType {
-
+        CURRENT_POSITION("CURRENT_POSITION", 0)
     }
 
     enum class StringType(

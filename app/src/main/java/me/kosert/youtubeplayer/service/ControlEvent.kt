@@ -1,12 +1,14 @@
 package me.kosert.youtubeplayer.service
 
 class ControlEvent(
-        val type: OperationType
+        val type: OperationType,
+        val index: Int = -1
 )
 
 enum class OperationType {
     PLAY,
     PAUSE,
     STOP,
-    NEXT
+    NEXT,
+    SELECTED
 }

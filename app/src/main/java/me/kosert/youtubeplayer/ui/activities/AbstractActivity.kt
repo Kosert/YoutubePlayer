@@ -61,14 +61,17 @@ abstract class AbstractActivity : AppCompatActivity(), IAbstractActivity {
     }
 
     override fun showProgress(visible: Boolean) {
-
-        val progressDialog = supportFragmentManager.findFragmentByTag(PROGRESS_TAG) as ProgressDialog?
-                ?: ProgressDialog.newInstance()
-
-        if (visible)
+        if (visible) {
+            val progressDialog = supportFragmentManager.findFragmentByTag(PROGRESS_TAG) as ProgressDialog?
+                    ?: ProgressDialog.newInstance()
             progressDialog.show(supportFragmentManager, PROGRESS_TAG)
-        else
-            progressDialog.dismiss()
+        }
+        else {
+            supportFragmentManager.findFragmentByTag(PROGRESS_TAG)?.let {
+                it as ProgressDialog
+                it.dismiss()
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

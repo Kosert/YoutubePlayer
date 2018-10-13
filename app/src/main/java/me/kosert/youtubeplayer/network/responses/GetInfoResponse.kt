@@ -7,10 +7,11 @@ class GetInfoResponse(
         @Expose val title: String,
         @Expose val url: String,
         @Expose val length: Int,
-        @Expose val formats: List<Format>
+        @Expose val formats: List<Format>,
+        @Expose val thumb: String
 ) : AbstractResponseMessage() {
 
     override fun toString(): String {
-        return "GetInfoResponse(title='$title', url='$url', length='$length', formats=$formats)"
+        return "GetInfoResponse(title='$title', url='$url', length='$length', formats=$formats, thumb=$thumb)"
     }
 }
