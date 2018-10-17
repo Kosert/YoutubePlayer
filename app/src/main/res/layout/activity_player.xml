@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/red"
-        app:titleTextColor="@color/white"
-        android:elevation="4dp"/>
+        android:elevation="4dp"
+        app:titleTextColor="@color/white" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/songRecycler"
@@ -26,18 +26,18 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginTop="8dp"
-        android:paddingTop="8dp"
         android:background="@color/grayLight"
         android:clipToPadding="true"
         android:elevation="8dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp">
+            android:layout_marginRight="8dp">
 
             <TextView
                 android:id="@+id/currentTimeText"

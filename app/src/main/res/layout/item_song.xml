@@ -47,12 +47,12 @@
     </LinearLayout>
 
     <ImageView
-        android:id="@+id/removeButton"
+        android:id="@+id/moreButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:padding="8dp"
-        android:src="@drawable/ic_close_black_24dp"
-        android:background="?attr/selectableItemBackgroundBorderless"/>
+        tools:src="@drawable/ic_close_black_24dp" />
 
 </LinearLayout>

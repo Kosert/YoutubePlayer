@@ -16,10 +16,11 @@ object MusicProvider {
         return song.getMusicFile().exists()
     }
 
-    fun fetchSongUri(song: Song) {
+    fun fetchSong(song: Song) {
 
-        song.downloadFormats(object : SongLoadedListener {
-            override fun onSongLoaded(uri: String) {
+//        song.downloadFormats(object : SongLoadedListener {
+//            override fun onSongLoaded(uri: String) {
+                val uri = song.format?.url
 
                 val request = DownloadManager.Request(Uri.parse(uri))
                 request.setDescription("Downloading: ${song.title}")
@@ -34,8 +35,8 @@ object MusicProvider {
 //                    listener.onSongLoaded(downloadedUri)
 //                })
 //                App.get().registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-            }
-        })
+//            }
+//        })
 
         //TODO("proxy the song and save")
     }

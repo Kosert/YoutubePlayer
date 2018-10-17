@@ -41,12 +41,12 @@ object Network
                     .setClass(requestMessage.responseClass)
                     .setContent(response)
                     .create()
-			bus.post(NetworkResponseEvent(responseMessage))
+			bus.post(NetworkResponseEvent(requestMessage, responseMessage))
 		},
 		Response.ErrorListener { error ->
 			logger.e("Request failed $error for ${requestMessage::class.java.simpleName}")
 
-            bus.post(NetworkResponseEvent())
+            bus.post(NetworkResponseEvent(requestMessage))
 		})
 
 		requestQueue.add(request)

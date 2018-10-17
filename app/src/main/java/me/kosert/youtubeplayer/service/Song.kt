@@ -85,4 +85,8 @@ class Song(
             //listener?.onError()
         }
     }
+
+    override fun toString(): String {
+        return "Song(title='$title', ytUrl='$ytUrl', length=$length)"
+    }
 }

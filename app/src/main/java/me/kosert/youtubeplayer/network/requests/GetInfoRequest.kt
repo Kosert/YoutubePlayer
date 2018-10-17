@@ -4,7 +4,8 @@ import me.kosert.youtubeplayer.network.RequestMethod
 import me.kosert.youtubeplayer.network.responses.GetInfoResponse
 
 class GetInfoRequest(
-        val url: String
+        val url: String,
+        val isFromActivity: Boolean = false
 ): AbstractRequestMessage() {
 
     override val method = RequestMethod.POST

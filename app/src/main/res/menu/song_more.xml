@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.activities.player.PlayerActivity">
+
+    <item
+        android:id="@+id/changePlaylist"
+        android:icon="@drawable/ic_swap_horiz_black_24dp"
+        android:title="Move to playlist"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/remove"
+        android:icon="@drawable/ic_close_black_24dp"
+        android:title="Remove"
+        app:showAsAction="always" />
+</menu>

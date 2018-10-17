@@ -45,12 +45,15 @@ class MainActivity : AbstractActivity(), MainActivityCallbacks
 
     override fun onVideoClicked() {
         showProgress(true)
-        val request = GetInfoRequest(webView.url)
+        val request = GetInfoRequest(webView.url, true)
         Network.send(request)
     }
 
     @Subscribe
     fun onNewNetworkEvent(event: NetworkResponseEvent) {
+
+        val request = event.requestMessage as GetInfoRequest
+        if (!request.isFromActivity) return
 
         val response = event.responseMessage as GetInfoResponse
         val audioFormats = response.formats.filter {

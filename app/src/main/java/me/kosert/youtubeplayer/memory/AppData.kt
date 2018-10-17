@@ -25,13 +25,21 @@ object AppData : AbstractPrefs<AppData.BooleanType, AppData.IntType, AppData.Str
             override val prefKey: String,
             override val default: String
     ) : IStringPrefType {
+        USER_PLAYLIST_NAME("USER_PLAYLIST_NAME", "Default playlist"),
 
+        SAVED_NAME_1("SAVED_NAME_1", "Playlist 1"),
+        SAVED_NAME_2("SAVED_NAME_2", "Playlist 2"),
+        SAVED_NAME_3("SAVED_NAME_3", "Playlist 3")
     }
 
     enum class AnyType(
             override val prefKey: String,
             override val default: Any
     ) : IAnyPrefType {
-        USER_PLAYLIST("USER_PLAYLIST", arrayOf<Song>())
+        USER_PLAYLIST("USER_PLAYLIST", arrayOf<Song>()),
+
+        SAVED_1("SAVED_PLAYLIST1", arrayOf<Song>()),
+        SAVED_2("SAVED_PLAYLIST2", arrayOf<Song>()),
+        SAVED_3("SAVED_PLAYLIST3", arrayOf<Song>())
     }
 }

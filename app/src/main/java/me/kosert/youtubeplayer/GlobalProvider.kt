@@ -37,9 +37,11 @@ object GlobalProvider {
         GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()
     }
 
-    var currentState : StateEvent = StateEvent(PlayingState.STOPPED,
+    var currentState = StateEvent(
+            PlayingState.STOPPED,
             MusicQueue.queue.getOrNull(AppData.getInt(AppData.IntType.CURRENT_POSITION)),
-            0)
+            0
+    )
         set(value) {
             field = value
             bus.post(value)

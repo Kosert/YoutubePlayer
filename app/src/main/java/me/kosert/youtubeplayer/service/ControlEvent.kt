@@ -10,5 +10,6 @@ enum class OperationType {
     PAUSE,
     STOP,
     NEXT,
-    SELECTED
+    SELECTED,
+    PLAYLIST_SWAP
 }

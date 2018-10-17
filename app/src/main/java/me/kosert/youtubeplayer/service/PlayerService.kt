@@ -114,6 +114,7 @@ class PlayerService : Service() {
             OperationType.STOP -> stop()
             OperationType.SELECTED -> selectSong(event.index)
             OperationType.NEXT -> goNext() //MusicQueue.onNext()
+            OperationType.PLAYLIST_SWAP -> onSwap()
         }
 
         if (event.type == OperationType.PLAY) {
@@ -149,7 +150,7 @@ class PlayerService : Service() {
         }
         else {
             //TODO wyjebac to, download na dodaniu, tutaj jak nie ma to goNext
-//            MusicProvider.fetchSongUri(song, object : SongLoadedListener {
+//            MusicProvider.fetchSong(song, object : SongLoadedListener {
 //                override fun onSongLoaded(uri: String) {
 //                    loadSong(song)
 //                }
@@ -192,6 +193,12 @@ class PlayerService : Service() {
             GlobalProvider.currentState = StateEvent(PlayingState.STOPPED, controller.currentSong, 0)
         }
         mediaPlayer = null
+    }
+
+    private fun onSwap() {
+        stop()
+        controller.selectSong(-1)
+        GlobalProvider.currentState = StateEvent(PlayingState.STOPPED, controller.currentSong, 0)
     }
 
     private val onPlaybackCompleted = MediaPlayer.OnCompletionListener {
