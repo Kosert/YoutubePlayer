@@ -39,24 +39,24 @@ class PlayerActivity : AbstractActivity(), PlayerView {
             override fun isItemViewSwipeEnabled(): Boolean = false
             override fun isLongPressDragEnabled(): Boolean = true
 
-            override fun getMovementFlags(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?): Int {
+            override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
                 val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
                 val swipeFlags = ItemTouchHelper.START or ItemTouchHelper.END
                 return ItemTouchHelper.Callback.makeMovementFlags(dragFlags, swipeFlags)
             }
 
-            override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 MusicQueue.swap(viewHolder.adapterPosition, target.adapterPosition)
-                songRecycler.adapter.notifyItemMoved(viewHolder.adapterPosition, target.adapterPosition)
+                songRecycler.adapter?.notifyItemMoved(viewHolder.adapterPosition, target.adapterPosition)
                 return true
             }
 
-            override fun clearView(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?) {
+            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
                 super.clearView(recyclerView, viewHolder)
                 bus.post(QueueChangedEvent())
             }
 
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 throw(Exception("should not hit this"))
             }
         })
@@ -135,7 +135,7 @@ class PlayerActivity : AbstractActivity(), PlayerView {
 
     @Subscribe
     fun onQueueChanged(event: QueueChangedEvent) {
-        songRecycler.adapter.notifyDataSetChanged()
+        songRecycler.adapter?.notifyDataSetChanged()
         updateTitle()
     }
 
@@ -152,7 +152,7 @@ class PlayerActivity : AbstractActivity(), PlayerView {
                 val index1 = event.song?.let { MusicQueue.getIndex(it) }
                 val index2 = previousState?.song?.let { MusicQueue.getIndex(it) }
                 listOfNotNull(index1, index2).forEach {
-                    songRecycler.adapter.notifyItemChanged(it)
+                    songRecycler.adapter?.notifyItemChanged(it)
                 }
             }
 
@@ -161,7 +161,7 @@ class PlayerActivity : AbstractActivity(), PlayerView {
                 if (!songChanged)
                 (event.song ?: previousState?.song)?.let {
                     val index = MusicQueue.getIndex(it)
-                    songRecycler.adapter.notifyItemChanged(index)
+                    songRecycler.adapter?.notifyItemChanged(index)
                 }
             }
 

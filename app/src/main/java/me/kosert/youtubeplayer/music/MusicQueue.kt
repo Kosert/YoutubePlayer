@@ -30,7 +30,8 @@ object MusicQueue {
 
     fun addSong(song: Song) {
         queue.add(song)
-        MusicProvider.fetchSong(song)
+        if (!MusicProvider.isSongSaved(song))
+            MusicProvider.fetchSong(song)
         AppData.setAny(USER_PLAYLIST, queue.toTypedArray())
         bus.post(QueueChangedEvent())
     }

@@ -50,10 +50,6 @@ class PlayerService : Service() {
 
     override fun onBind(intent: Intent): IBinder? = null
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return START_NOT_STICKY
-    }
-
     override fun onCreate() {
         super.onCreate()
         logger.i("Creating")
@@ -79,6 +75,12 @@ class PlayerService : Service() {
         headsetReceiver = HeadsetConnectionReceiver()
         registerReceiver(headsetReceiver, IntentFilter(AudioManager.ACTION_HEADSET_PLUG))
         startForeground(ONGOING_NOTIFICATION_ID, createNotification(getCurrentPlayingState()))
+    }
+
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        logger.i("onStartCommand")
+        return START_STICKY
     }
 
     override fun onDestroy() {
@@ -147,8 +149,7 @@ class PlayerService : Service() {
         val song = controller.currentSong ?: return
         if (MusicProvider.isSongSaved(song)) {
             loadSong(song)
-        }
-        else {
+        } else {
             //TODO wyjebac to, download na dodaniu, tutaj jak nie ma to goNext
 //            MusicProvider.fetchSong(song, object : SongLoadedListener {
 //                override fun onSongLoaded(uri: String) {
@@ -241,7 +242,7 @@ class PlayerService : Service() {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID,
                     NOTIFICATION_CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_DEFAULT)
+                    NotificationManager.IMPORTANCE_HIGH)
             channel.description = "Player Service"
             notificationManager.createNotificationChannel(channel)
         }

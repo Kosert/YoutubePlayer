@@ -2,6 +2,7 @@ package me.kosert.youtubeplayer.ui.activities.main
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import com.squareup.otto.Subscribe
@@ -19,15 +20,17 @@ import me.kosert.youtubeplayer.ui.activities.AbstractActivity
 import me.kosert.youtubeplayer.ui.activities.main.webview.ChromeClient
 import me.kosert.youtubeplayer.ui.activities.main.webview.WebClient
 
-class MainActivity : AbstractActivity(), MainActivityCallbacks
-{
+class MainActivity : AbstractActivity(), MainActivityCallbacks {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val intent = Intent(this, PlayerService::class.java)
-        startService(intent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            startForegroundService(intent)
+        else
+            startService(intent)
 
         webView.settings.mediaPlaybackRequiresUserGesture = true
         webView.settings.javaScriptEnabled = true
@@ -67,8 +70,7 @@ class MainActivity : AbstractActivity(), MainActivityCallbacks
             val song = Song(response.title, response.url, response.length, format)
             MusicQueue.addSong(song)
             showSnack("ADDED TO QUEUE: " + response.title, Snackbar.LENGTH_LONG)
-        }
-        else {
+        } else {
             showSnack("ERROR: No suitable audio format :(", Snackbar.LENGTH_LONG)
         }
     }
