@@ -72,6 +72,12 @@ class PlayerActivity : AbstractActivity(), PlayerView {
         stopButton.setOnClickListener { bus.post(ControlEvent(OperationType.STOP)) }
         nextButton.setOnClickListener { bus.post(ControlEvent(OperationType.NEXT)) }
         seekBar.setOnTouchListener { _, _ -> return@setOnTouchListener true }
+
+        GlobalProvider.currentState.song?.let {
+            val index = (MusicQueue.getIndex(it) + 5) //fixme calculate how many items fit on screen
+                    .coerceAtMost(MusicQueue.queue.size - 1)
+            songRecycler.smoothScrollToPosition(index)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
