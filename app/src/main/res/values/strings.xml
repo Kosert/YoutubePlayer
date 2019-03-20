@@ -19,6 +19,8 @@
 
     <!-- ProgressDialog -->
     <string name="please_wait">Please wait…</string>
+    <string name="download_in_progress">Download in progress…</string>
+    <string name="song_missing">Song file is missing. Tap to redownload</string>
 
     <!-- MainActivity -->
 

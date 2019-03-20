@@ -11,13 +11,11 @@ import kotlinx.android.synthetic.main.activity_player.*
 import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.R
 import me.kosert.youtubeplayer.memory.AppData
+import me.kosert.youtubeplayer.music.MusicProvider
 import me.kosert.youtubeplayer.music.MusicQueue
 import me.kosert.youtubeplayer.music.QueueChangedEvent
 import me.kosert.youtubeplayer.music.StateEvent
-import me.kosert.youtubeplayer.service.ControlEvent
-import me.kosert.youtubeplayer.service.OperationType
-import me.kosert.youtubeplayer.service.PlayingState
-import me.kosert.youtubeplayer.service.Song
+import me.kosert.youtubeplayer.service.*
 import me.kosert.youtubeplayer.ui.activities.AbstractActivity
 import me.kosert.youtubeplayer.ui.dialogs.PlaylistsDialog
 import java.text.DecimalFormat
@@ -133,6 +131,10 @@ class PlayerActivity : AbstractActivity(), PlayerView {
                 }.show(supportFragmentManager, PlaylistsDialog.TAG)
                 true
             }
+            R.id.redownloadButton -> {
+                MusicProvider.checkQueue()
+                true
+            }
             else -> {
                 super.onOptionsItemSelected(item)
             }
@@ -174,5 +176,11 @@ class PlayerActivity : AbstractActivity(), PlayerView {
             updateCurrentTime(event.millis)
             previousState = event
         }
+    }
+
+    @Subscribe
+    fun onDownloadEvent(event: DownloadEvent) {
+        val index = MusicQueue.getIndex(Song("", event.ytUrl, 0, null))
+        songRecycler.adapter.notifyItemChanged(index)
     }
 }

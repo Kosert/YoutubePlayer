@@ -1,6 +1,7 @@
 package me.kosert.youtubeplayer.ui.activities.player
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.Typeface
 import android.support.v4.app.FragmentManager
 import android.support.v7.widget.PopupMenu
@@ -12,6 +13,7 @@ import kotlinx.android.synthetic.main.item_song.view.*
 import me.kosert.youtubeplayer.App
 import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.R
+import me.kosert.youtubeplayer.music.MusicProvider
 import me.kosert.youtubeplayer.music.MusicQueue
 import me.kosert.youtubeplayer.service.PlayingState
 import me.kosert.youtubeplayer.service.Song
@@ -69,9 +71,23 @@ class SongAdapter(
 
             numberTextView.text = (position + 1).toString()
             titleTextView.text = song.title
-            val formatter = DecimalFormat("00")
-            val lengthString = "${song.length / 60}:${formatter.format(song.length % 60)}"
-            lengthTextView.text = lengthString
+
+            when {
+                MusicProvider.downloading.containsValue(song.ytUrl) -> {
+                    lengthTextView.text = App.get().getString(R.string.download_in_progress)
+                    lengthTextView.setTextColor(Color.rgb(128,128,128))
+                }
+                MusicProvider.isSongSaved(song) -> {
+                    val formatter = DecimalFormat("00")
+                    val lengthString = "${song.length / 60}:${formatter.format(song.length % 60)}"
+                    lengthTextView.text = lengthString
+                    lengthTextView.setTextColor(Color.rgb(128,128,128))
+                }
+                else -> {
+                    lengthTextView.text = App.get().getString(R.string.song_missing)
+                    lengthTextView.setTextColor(Color.RED)
+                }
+            }
         }
 
         val onClick = View.OnClickListener {

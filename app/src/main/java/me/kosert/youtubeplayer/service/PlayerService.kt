@@ -141,8 +141,10 @@ class PlayerService : Service() {
 
     private fun postPlayingTime() {
         mediaPlayer?.let {
+            if (controller.currentSong != GlobalProvider.currentState.song)
+                updateNotification()
+
             GlobalProvider.currentState = StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition)
-            updateNotification()
         }
 
         timeHandler.postDelayed({
@@ -161,16 +163,10 @@ class PlayerService : Service() {
         }
 
         val song = controller.currentSong ?: return
-        if (MusicProvider.isSongSaved(song)) {
+        if (MusicProvider.isSongSaved(song))
             loadSong(song)
-        } else {
-            //TODO wyjebac to, download na dodaniu, tutaj jak nie ma to goNext
-//            MusicProvider.fetchSong(song, object : SongLoadedListener {
-//                override fun onSongLoaded(uri: String) {
-//                    loadSong(song)
-//                }
-//            })
-        }
+        else
+            MusicProvider.fetchSong(song)
 
     }
 
@@ -258,6 +254,9 @@ class PlayerService : Service() {
                     NOTIFICATION_CHANNEL_NAME,
                     NotificationManager.IMPORTANCE_HIGH)
             channel.description = "Player Service"
+            channel.vibrationPattern = longArrayOf(0)
+            channel.enableVibration(true)
+            channel.setSound(null, null)
             notificationManager.createNotificationChannel(channel)
         }
 
