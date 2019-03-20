@@ -3,27 +3,26 @@ package me.kosert.youtubeplayer.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import me.kosert.channelbus.GlobalBus
 import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.service.ControlEvent
 import me.kosert.youtubeplayer.service.OperationType
 
 class ControlReceiver : BroadcastReceiver() {
 
-    val bus = GlobalProvider.bus
-
     override fun onReceive(context: Context, intent: Intent) {
         when(intent.action) {
             GlobalProvider.PLAY_ACTION -> {
-                bus.post(ControlEvent(OperationType.PLAY))
+                GlobalBus.post(ControlEvent(OperationType.PLAY))
             }
             GlobalProvider.PAUSE_ACTION -> {
-                bus.post(ControlEvent(OperationType.PAUSE))
+                GlobalBus.post(ControlEvent(OperationType.PAUSE))
             }
             GlobalProvider.STOP_ACTION -> {
-                bus.post(ControlEvent(OperationType.STOP))
+                GlobalBus.post(ControlEvent(OperationType.STOP))
             }
             GlobalProvider.NEXT_ACTION -> {
-                bus.post(ControlEvent(OperationType.NEXT))
+                GlobalBus.post(ControlEvent(OperationType.NEXT))
             }
         }
     }

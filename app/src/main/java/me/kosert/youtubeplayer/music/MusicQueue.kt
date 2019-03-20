@@ -1,6 +1,6 @@
 package me.kosert.youtubeplayer.music
 
-import me.kosert.youtubeplayer.GlobalProvider.bus
+import me.kosert.channelbus.GlobalBus
 import me.kosert.youtubeplayer.memory.AppData
 import me.kosert.youtubeplayer.memory.AppData.AnyType.*
 import me.kosert.youtubeplayer.memory.AppData.StringType.*
@@ -32,7 +32,7 @@ object MusicQueue {
         if (!MusicProvider.isSongSaved(song))
             MusicProvider.fetchSong(song)
         AppData.setAny(USER_PLAYLIST, queue.toTypedArray())
-        bus.post(QueueChangedEvent())
+        GlobalBus.post(QueueChangedEvent())
     }
 
     fun removeSong(position: Int) {
@@ -49,7 +49,7 @@ object MusicQueue {
             removed.getMusicFile().delete()
         }
 
-        bus.post(QueueChangedEvent())
+        GlobalBus.post(QueueChangedEvent())
     }
 
     fun swap(fromPosition: Int, toPosition: Int) {
@@ -79,7 +79,7 @@ object MusicQueue {
     }
 
     fun changePlaylist(number: Int) {
-        bus.post(ControlEvent(OperationType.PLAYLIST_SWAP))
+        GlobalBus.post(ControlEvent(OperationType.PLAYLIST_SWAP))
 
         logger.i("Swapped with playlist nr $number")
 
@@ -107,6 +107,6 @@ object MusicQueue {
 
         queue.clear()
         toSwap.forEach { queue.add(it as Song) }
-        bus.post(QueueChangedEvent())
+        GlobalBus.post(QueueChangedEvent())
     }
 }

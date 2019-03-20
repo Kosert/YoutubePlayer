@@ -2,9 +2,8 @@ package me.kosert.youtubeplayer.network
 
 import com.android.volley.Response
 import com.android.volley.toolbox.Volley
+import me.kosert.channelbus.GlobalBus
 import me.kosert.youtubeplayer.App
-import me.kosert.youtubeplayer.Conf
-import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.network.requests.AbstractRequestMessage
 import me.kosert.youtubeplayer.network.requests.ParametrizedStringRequest
 import me.kosert.youtubeplayer.network.responses.AbstractResponseMessage
@@ -13,15 +12,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 
-object Network
-{
-	private const val baseUrl = Conf.KOSERT_URL
+object Network {
 
 	private val logger = Logger("Network")
-
-	private val bus by lazy {
-		GlobalProvider.bus
-	}
 
 	private val requestQueue by lazy {
 		Volley.newRequestQueue(App.get())
@@ -39,12 +32,12 @@ object Network
                     .setClass(requestMessage.responseClass)
                     .setContent(response)
                     .create()
-			bus.post(NetworkResponseEvent(requestMessage, responseMessage))
+			GlobalBus.post(NetworkResponseEvent(requestMessage, responseMessage))
 		},
 		Response.ErrorListener { error ->
 			logger.e("Request failed $error for ${requestMessage::class.java.simpleName}")
 
-            bus.post(NetworkResponseEvent(requestMessage))
+            GlobalBus.post(NetworkResponseEvent(requestMessage))
 		})
 
 		requestQueue.add(request)

@@ -9,7 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
-import me.kosert.youtubeplayer.GlobalProvider
+import me.kosert.channelbus.EventReceiver
 import me.kosert.youtubeplayer.ui.dialogs.ProgressDialog
 import me.kosert.youtubeplayer.util.Logger
 
@@ -17,7 +17,7 @@ abstract class AbstractActivity : AppCompatActivity(), IAbstractActivity {
 
     protected val logger = Logger(this.javaClass.simpleName)
     protected val handler = Handler()
-    protected val bus = GlobalProvider.bus
+    protected val receiver by lazy { EventReceiver() }
 
     private val flowLogger = Logger("FLOW")
 
@@ -31,14 +31,13 @@ abstract class AbstractActivity : AppCompatActivity(), IAbstractActivity {
     override fun onStart() {
         super.onStart()
         flowLogger.i("onStart - ${this::class.java.simpleName}")
-        bus.register(this)
     }
 
     @CallSuper
     override fun onStop() {
         super.onStop()
         flowLogger.i("onStop - ${this::class.java.simpleName}")
-        bus.unregister(this)
+        receiver.unsubscribeAll()
     }
 
     override fun showToast(text: String, length: Int) {

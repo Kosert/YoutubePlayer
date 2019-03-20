@@ -6,8 +6,8 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.Menu
 import android.view.MenuItem
-import com.squareup.otto.Subscribe
 import kotlinx.android.synthetic.main.activity_player.*
+import me.kosert.channelbus.GlobalBus
 import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.R
 import me.kosert.youtubeplayer.memory.AppData
@@ -51,7 +51,7 @@ class PlayerActivity : AbstractActivity(), PlayerView {
 
             override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
                 super.clearView(recyclerView, viewHolder)
-                bus.post(QueueChangedEvent())
+                GlobalBus.post(QueueChangedEvent())
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -61,14 +61,15 @@ class PlayerActivity : AbstractActivity(), PlayerView {
         touchHelper.attachToRecyclerView(songRecycler)
 
         playPauseButton.setOnClickListener {
+
             val event = if (GlobalProvider.currentState.state != PlayingState.PLAYING)
                 ControlEvent(OperationType.PLAY)
             else
                 ControlEvent(OperationType.PAUSE)
-            bus.post(event)
+            GlobalBus.post(event)
         }
-        stopButton.setOnClickListener { bus.post(ControlEvent(OperationType.STOP)) }
-        nextButton.setOnClickListener { bus.post(ControlEvent(OperationType.NEXT)) }
+        stopButton.setOnClickListener { GlobalBus.post(ControlEvent(OperationType.STOP)) }
+        nextButton.setOnClickListener { GlobalBus.post(ControlEvent(OperationType.NEXT)) }
         seekBar.setOnTouchListener { _, _ -> return@setOnTouchListener true }
 
         GlobalProvider.currentState.song?.let {
@@ -116,7 +117,7 @@ class PlayerActivity : AbstractActivity(), PlayerView {
     }
 
     override fun onSongSelected(position: Int) {
-        bus.post(ControlEvent(OperationType.SELECTED, position))
+        GlobalBus.post(ControlEvent(OperationType.SELECTED, position))
     }
 
     override fun onSongRemoveClicked(position: Int) {
@@ -124,7 +125,7 @@ class PlayerActivity : AbstractActivity(), PlayerView {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when(item?.itemId) {
+        return when (item?.itemId) {
             R.id.playlistButton -> {
                 PlaylistsDialog.newInstance("Change playlist").apply {
                     onSelectedAction = { MusicQueue.changePlaylist(it.number) }
@@ -141,46 +142,44 @@ class PlayerActivity : AbstractActivity(), PlayerView {
         }
     }
 
-    @Subscribe
-    fun onQueueChanged(event: QueueChangedEvent) {
-        songRecycler.adapter?.notifyDataSetChanged()
-        updateTitle()
+    override fun onStart() {
+        super.onStart()
+        receiver.subscribe { event: QueueChangedEvent ->
+            songRecycler.adapter?.notifyDataSetChanged()
+            updateTitle()
+        }.subscribe { event: DownloadEvent ->
+            val index = MusicQueue.getIndex(Song("", event.ytUrl, 0, null))
+            songRecycler.adapter.notifyItemChanged(index)
+        }.subscribe { event: StateEvent ->
+            onPlayerStateChanged(event)
+        }
     }
 
-    private var previousState : StateEvent? = null
+    private var previousState: StateEvent? = null
 
-    @Subscribe
-    fun onPlayerStateChanged(event: StateEvent) {
-        handler.post {
-            var songChanged = false
+    private fun onPlayerStateChanged(event: StateEvent) {
+        var songChanged = false
 
-            if (previousState?.song !== event.song) {
-                songChanged = true
-                updateCurrentSong(event.song)
-                val index1 = event.song?.let { MusicQueue.getIndex(it) }
-                val index2 = previousState?.song?.let { MusicQueue.getIndex(it) }
-                listOfNotNull(index1, index2).forEach {
-                    songRecycler.adapter?.notifyItemChanged(it)
-                }
+        if (previousState?.song !== event.song) {
+            songChanged = true
+            updateCurrentSong(event.song)
+            val index1 = event.song?.let { MusicQueue.getIndex(it) }
+            val index2 = previousState?.song?.let { MusicQueue.getIndex(it) }
+            listOfNotNull(index1, index2).forEach {
+                songRecycler.adapter?.notifyItemChanged(it)
             }
+        }
 
-            if (previousState?.state != event.state) {
-                updateView(event.state)
-                if (!songChanged)
+        if (previousState?.state != event.state) {
+            updateView(event.state)
+            if (!songChanged)
                 (event.song ?: previousState?.song)?.let {
                     val index = MusicQueue.getIndex(it)
                     songRecycler.adapter?.notifyItemChanged(index)
                 }
-            }
-
-            updateCurrentTime(event.millis)
-            previousState = event
         }
-    }
 
-    @Subscribe
-    fun onDownloadEvent(event: DownloadEvent) {
-        val index = MusicQueue.getIndex(Song("", event.ytUrl, 0, null))
-        songRecycler.adapter.notifyItemChanged(index)
+        updateCurrentTime(event.millis)
+        previousState = event
     }
 }

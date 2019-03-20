@@ -6,8 +6,8 @@ import android.net.Uri
 import android.widget.Toast
 import com.crashlytics.android.Crashlytics
 import kotlinx.coroutines.*
+import me.kosert.channelbus.GlobalBus
 import me.kosert.youtubeplayer.App
-import me.kosert.youtubeplayer.GlobalProvider.bus
 import me.kosert.youtubeplayer.network.Network
 import me.kosert.youtubeplayer.network.requests.GetInfoRequest
 import me.kosert.youtubeplayer.network.responses.GetInfoResponse
@@ -64,10 +64,7 @@ object MusicProvider {
             val manager = App.get().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             val id = manager.enqueue(request)
             downloading[id] = song.ytUrl
-            withContext(Dispatchers.Main) {
-                bus.post(DownloadEvent(song.ytUrl))
-            }
+            GlobalBus.post(DownloadEvent(song.ytUrl))
         }
-
     }
 }

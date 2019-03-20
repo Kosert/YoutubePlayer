@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
-import me.kosert.youtubeplayer.GlobalProvider
+import me.kosert.channelbus.GlobalBus
 import me.kosert.youtubeplayer.service.ControlEvent
 import me.kosert.youtubeplayer.service.OperationType
 
@@ -15,7 +15,7 @@ class HeadsetConnectionReceiver : BroadcastReceiver() {
         if (intent.action == AudioManager.ACTION_HEADSET_PLUG) {
             val state = intent.getIntExtra("state", 0)
             if (state == 0)
-                GlobalProvider.bus.post(ControlEvent(OperationType.PAUSE))
+                GlobalBus.post(ControlEvent(OperationType.PAUSE))
         }
 
     }

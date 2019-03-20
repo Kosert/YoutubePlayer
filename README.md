@@ -10,9 +10,9 @@ Powered by [kosert.me/youtube](http://kosert.me/youtube)
 - Play YouTube music in the background
 
 ## Attributions
+- [ChannelBus](https://github.com/Kosert/ChannelBus)
 - [Glide](https://github.com/bumptech/glide)
 - [Volley](https://github.com/google/volley)
-- [Otto](http://square.github.io/otto/)
 - [Gson](https://github.com/google/gson)
 
 ## Additional Information

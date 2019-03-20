@@ -1,7 +1,6 @@
 package me.kosert.youtubeplayer.service
 
 import android.app.*
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -16,8 +15,8 @@ import android.os.IBinder
 import android.support.v4.app.NotificationCompat
 import android.support.v4.media.app.NotificationCompat.MediaStyle
 import android.view.KeyEvent
-import com.squareup.otto.Produce
-import com.squareup.otto.Subscribe
+import me.kosert.channelbus.EventReceiver
+import me.kosert.channelbus.GlobalBus
 import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.R
 import me.kosert.youtubeplayer.music.MusicProvider
@@ -25,6 +24,7 @@ import me.kosert.youtubeplayer.music.QueueChangedEvent
 import me.kosert.youtubeplayer.music.StateEvent
 import me.kosert.youtubeplayer.receivers.AppShutdownReceiver
 import me.kosert.youtubeplayer.receivers.ControlReceiver
+import me.kosert.youtubeplayer.receivers.DownloadReceiver
 import me.kosert.youtubeplayer.receivers.HeadsetConnectionReceiver
 import me.kosert.youtubeplayer.ui.activities.player.PlayerActivity
 import me.kosert.youtubeplayer.util.Logger
@@ -33,29 +33,16 @@ import java.io.FileInputStream
 
 class PlayerService : Service() {
 
-    private val bus = GlobalProvider.bus
+    private val receiver by lazy { EventReceiver() }
     private val logger = Logger("PlayerService")
     private val timeHandler = Handler()
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var mediaSession: MediaSession
-    private lateinit var headsetReceiver: HeadsetConnectionReceiver
+
+    private val headsetReceiver by lazy { HeadsetConnectionReceiver() }
+    private val downloadReceiver by lazy { DownloadReceiver() }
 
     private val controller = NowPlayingController()
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L) ?: -1L
-            if (id == -1L) return
-
-            MusicProvider.downloading.remove(id)?.let {
-                bus.post(DownloadEvent(it))
-            }
-        }
-    }
-
-    @Produce
-    fun getLastStateEvent(): StateEvent? {
-        return GlobalProvider.currentState
-    }
 
     private fun getCurrentPlayingState() = GlobalProvider.currentState.state
 
@@ -64,28 +51,10 @@ class PlayerService : Service() {
     override fun onCreate() {
         super.onCreate()
         logger.i("Creating")
-        bus.register(this)
-        registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-
-        mediaSession = MediaSession(this, "PlayerService")
-        mediaSession.setCallback(object : MediaSession.Callback() {
-            override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
-
-                val keyEvent = mediaButtonIntent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
-                if (keyEvent.action != KeyEvent.ACTION_DOWN) return true
-
-                logger.i("Media button pressed")
-                if (GlobalProvider.currentState.state == PlayingState.PLAYING)
-                    bus.post(ControlEvent(OperationType.PAUSE))
-                else
-                    bus.post(ControlEvent(OperationType.PLAY))
-
-                return true
-            }
-        })
-        mediaSession.isActive = true
-        headsetReceiver = HeadsetConnectionReceiver()
+        registerReceiver(downloadReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         registerReceiver(headsetReceiver, IntentFilter(AudioManager.ACTION_HEADSET_PLUG))
+
+        setEventCallbacks()
         startForeground(ONGOING_NOTIFICATION_ID, createNotification(getCurrentPlayingState()))
     }
 
@@ -98,8 +67,8 @@ class PlayerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         logger.i("Destroying")
-        bus.unregister(this)
-        unregisterReceiver(receiver)
+        receiver.unsubscribeAll()
+        unregisterReceiver(downloadReceiver)
 
         //MusicQueue.uninit()
         mediaSession.isActive = false
@@ -114,29 +83,45 @@ class PlayerService : Service() {
         }
     }
 
-    //TODO do wyjebania?
-    @Subscribe
-    fun onQueueChanged(event: QueueChangedEvent) {
-        updateNotification()
-    }
+    private fun setEventCallbacks() {
+        mediaSession = MediaSession(this, "PlayerService")
+        mediaSession.setCallback(object : MediaSession.Callback() {
+            override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
 
-    @Subscribe
-    fun onControlEvent(event: ControlEvent) {
-        logger.i("Control Event: " + event.type)
-        timeHandler.removeCallbacksAndMessages(null)
-        when (event.type) {
-            OperationType.PLAY -> play()
-            OperationType.PAUSE -> pause()
-            OperationType.STOP -> stop()
-            OperationType.SELECTED -> selectSong(event.index)
-            OperationType.NEXT -> goNext() //MusicQueue.onNext()
-            OperationType.PLAYLIST_SWAP -> onSwap()
-        }
+                val keyEvent = mediaButtonIntent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
+                if (keyEvent.action != KeyEvent.ACTION_DOWN) return true
 
-        if (event.type == OperationType.PLAY) {
-            postPlayingTime()
+                logger.i("Media button pressed")
+                if (GlobalProvider.currentState.state == PlayingState.PLAYING)
+                    GlobalBus.post(ControlEvent(OperationType.PAUSE))
+                else
+                    GlobalBus.post(ControlEvent(OperationType.PLAY))
+
+                return true
+            }
+        })
+        mediaSession.isActive = true
+
+        receiver.apply {
+            subscribe { e: QueueChangedEvent -> updateNotification() }
+            subscribe { event: ControlEvent ->
+                logger.i("Control Event: " + event.type)
+                timeHandler.removeCallbacksAndMessages(null)
+                when (event.type) {
+                    OperationType.PLAY -> play()
+                    OperationType.PAUSE -> pause()
+                    OperationType.STOP -> stop()
+                    OperationType.SELECTED -> selectSong(event.index)
+                    OperationType.NEXT -> goNext() //MusicQueue.onNext()
+                    OperationType.PLAYLIST_SWAP -> onSwap()
+                }
+
+                if (event.type == OperationType.PLAY) {
+                    postPlayingTime()
+                }
+                updateNotification()
+            }
         }
-        updateNotification()
     }
 
     private fun postPlayingTime() {
@@ -144,7 +129,7 @@ class PlayerService : Service() {
             if (controller.currentSong != GlobalProvider.currentState.song)
                 updateNotification()
 
-            GlobalProvider.currentState = StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition)
+            GlobalBus.post(StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition))
         }
 
         timeHandler.postDelayed({
@@ -157,7 +142,7 @@ class PlayerService : Service() {
         mediaPlayer?.let {
             if (getCurrentPlayingState() == PlayingState.PAUSED) {
                 it.start()
-                GlobalProvider.currentState = StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition)
+                GlobalBus.post(StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition))
                 return
             }
         }
@@ -183,7 +168,7 @@ class PlayerService : Service() {
             setDataSource(stream.fd)
             setOnCompletionListener(onPlaybackCompleted)
             setOnPreparedListener {
-                GlobalProvider.currentState = StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition)
+                GlobalBus.post(StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition))
                 start()
             }
             prepareAsync()
@@ -193,7 +178,7 @@ class PlayerService : Service() {
     private fun pause() {
         mediaPlayer?.let {
             it.pause()
-            GlobalProvider.currentState = StateEvent(PlayingState.PAUSED, controller.currentSong, it.currentPosition)
+            GlobalBus.post(StateEvent(PlayingState.PAUSED, controller.currentSong, it.currentPosition))
         }
     }
 
@@ -201,7 +186,7 @@ class PlayerService : Service() {
         mediaPlayer?.apply {
             stop()
             release()
-            GlobalProvider.currentState = StateEvent(PlayingState.STOPPED, controller.currentSong, 0)
+            GlobalBus.post(StateEvent(PlayingState.STOPPED, controller.currentSong, 0))
         }
         mediaPlayer = null
     }
@@ -209,12 +194,12 @@ class PlayerService : Service() {
     private fun onSwap() {
         stop()
         controller.selectSong(-1)
-        GlobalProvider.currentState = StateEvent(PlayingState.STOPPED, controller.currentSong, 0)
+        GlobalBus.post(StateEvent(PlayingState.STOPPED, controller.currentSong, 0))
     }
 
     private val onPlaybackCompleted = MediaPlayer.OnCompletionListener {
         logger.i("Playback completed")
-        GlobalProvider.currentState = StateEvent(PlayingState.STOPPED, controller.currentSong, 0)
+        GlobalBus.post(StateEvent(PlayingState.STOPPED, controller.currentSong, 0))
         if (controller.getNext() != null) {
             controller.goNext()
             play()
@@ -222,15 +207,15 @@ class PlayerService : Service() {
     }
 
     private fun goNext() {
-        bus.post(ControlEvent(OperationType.STOP))
+        GlobalBus.post(ControlEvent(OperationType.STOP))
         controller.goNext()
-        bus.post(ControlEvent(OperationType.PLAY))
+        GlobalBus.post(ControlEvent(OperationType.PLAY))
     }
 
     private fun selectSong(position: Int) {
-        bus.post(ControlEvent(OperationType.STOP))
+        GlobalBus.post(ControlEvent(OperationType.STOP))
         controller.selectSong(position)
-        bus.post(ControlEvent(OperationType.PLAY))
+        GlobalBus.post(ControlEvent(OperationType.PLAY))
     }
 
     private fun updateNotification() {
