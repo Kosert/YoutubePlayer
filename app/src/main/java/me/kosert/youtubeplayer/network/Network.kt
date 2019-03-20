@@ -1,18 +1,16 @@
 package me.kosert.youtubeplayer.network
 
 import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import me.kosert.youtubeplayer.App
 import me.kosert.youtubeplayer.Conf
 import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.network.requests.AbstractRequestMessage
-import me.kosert.youtubeplayer.util.Logger
-import com.android.volley.AuthFailureError
-import com.android.volley.VolleyError
-import com.android.volley.Request.Method.POST
 import me.kosert.youtubeplayer.network.requests.ParametrizedStringRequest
-import me.kosert.youtubeplayer.network.responses.GetInfoResponse
+import me.kosert.youtubeplayer.network.responses.AbstractResponseMessage
+import me.kosert.youtubeplayer.util.Logger
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 object Network
@@ -31,7 +29,7 @@ object Network
 
 	fun send(requestMessage: AbstractRequestMessage) {
 
-		logger.i("Sending request: " + requestMessage.toString())
+		logger.i("Sending request: $requestMessage")
 
 		val request = ParametrizedStringRequest(requestMessage,
 		Response.Listener { response ->
@@ -52,4 +50,29 @@ object Network
 		requestQueue.add(request)
 	}
 
+	suspend fun sendSuspend(requestMessage: AbstractRequestMessage): AbstractResponseMessage? {
+
+		logger.i("Sending request: $requestMessage")
+
+		return suspendCoroutine {
+			val request = ParametrizedStringRequest(requestMessage,
+					Response.Listener { response ->
+						logger.i("Response received: ${requestMessage.responseClass.simpleName} for ${requestMessage::class.java.simpleName}")
+
+						val responseMessage = ResponseBuilder()
+								.setClass(requestMessage.responseClass)
+								.setContent(response)
+								.create()
+
+						it.resume(responseMessage)
+					},
+					Response.ErrorListener { error ->
+						logger.e("Request failed $error for ${requestMessage::class.java.simpleName}")
+
+						it.resume(null)
+					})
+
+			requestQueue.add(request)
+		}
+	}
 }
