@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "493923753722",
+    "firebase_url": "https://ytplayer-582f0.firebaseio.com",
+    "project_id": "ytplayer-582f0",
+    "storage_bucket": "ytplayer-582f0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:493923753722:android:393bc440379d651b",
+        "android_client_info": {
+          "package_name": "me.kosert.youtubeplayer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "493923753722-45gmpfb89p8eu5g3pgkh89u20bkqcmee.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQstdhwFV-qdKcN7vtrM273VBHZo8PUFs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
