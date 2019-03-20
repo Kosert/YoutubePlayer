@@ -1,6 +1,7 @@
 package me.kosert.youtubeplayer.service
 
 import android.app.*
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -40,6 +41,16 @@ class PlayerService : Service() {
     private lateinit var headsetReceiver: HeadsetConnectionReceiver
 
     private val controller = NowPlayingController()
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L) ?: -1L
+            if (id == -1L) return
+
+            MusicProvider.downloading.remove(id)?.let {
+                bus.post(DownloadEvent(it))
+            }
+        }
+    }
 
     @Produce
     fun getLastStateEvent(): StateEvent? {
@@ -54,6 +65,7 @@ class PlayerService : Service() {
         super.onCreate()
         logger.i("Creating")
         bus.register(this)
+        registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         mediaSession = MediaSession(this, "PlayerService")
         mediaSession.setCallback(object : MediaSession.Callback() {
@@ -87,6 +99,8 @@ class PlayerService : Service() {
         super.onDestroy()
         logger.i("Destroying")
         bus.unregister(this)
+        unregisterReceiver(receiver)
+
         //MusicQueue.uninit()
         mediaSession.isActive = false
         unregisterReceiver(headsetReceiver)
