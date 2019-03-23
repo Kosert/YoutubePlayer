@@ -3,6 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.activities.player.PlayerActivity">
+
+    <!-- todo shuffle playback -->
+
+    <item
+        android:id="@+id/youtubeButton"
+        android:icon="@drawable/ic_youtubes"
+        android:title="Go to YouTube"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/playlistButton"
         android:icon="@drawable/ic_format_list_24dp"
@@ -13,5 +22,5 @@
         android:id="@+id/redownloadButton"
         android:icon="@drawable/ic_restore_24dp"
         android:title="Check&amp;Restore"
-        app:showAsAction="always" />
+        app:showAsAction="never" />
 </menu>

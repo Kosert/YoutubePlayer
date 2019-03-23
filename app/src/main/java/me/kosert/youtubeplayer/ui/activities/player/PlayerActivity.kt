@@ -1,5 +1,7 @@
 package me.kosert.youtubeplayer.ui.activities.player
 
+import android.content.Intent
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -17,7 +19,9 @@ import me.kosert.youtubeplayer.music.QueueChangedEvent
 import me.kosert.youtubeplayer.music.StateEvent
 import me.kosert.youtubeplayer.service.*
 import me.kosert.youtubeplayer.ui.activities.AbstractActivity
+import me.kosert.youtubeplayer.ui.activities.main.MainActivity
 import me.kosert.youtubeplayer.ui.dialogs.PlaylistsDialog
+import me.kosert.youtubeplayer.util.toColor
 import java.text.DecimalFormat
 
 class PlayerActivity : AbstractActivity(), PlayerView {
@@ -28,6 +32,7 @@ class PlayerActivity : AbstractActivity(), PlayerView {
 
         setSupportActionBar(toolbar)
         updateTitle()
+        toolbar.overflowIcon?.setColorFilter(R.color.white.toColor(), PorterDuff.Mode.SRC_ATOP)
 
         songRecycler.layoutManager = LinearLayoutManager(this)
         songRecycler.adapter = SongAdapter(this, supportFragmentManager, MusicQueue.queue)
@@ -86,7 +91,7 @@ class PlayerActivity : AbstractActivity(), PlayerView {
 
     private fun updateTitle() {
         val currentName = AppData.getString(AppData.StringType.USER_PLAYLIST_NAME)
-        supportActionBar?.title = "YoutubePlayer ($currentName)"
+        supportActionBar?.title = currentName
     }
 
     private fun updateView(state: PlayingState) {
@@ -100,10 +105,10 @@ class PlayerActivity : AbstractActivity(), PlayerView {
         val formatter = DecimalFormat("00")
         song?.let {
             val lengthString = "${it.length / 60}:${formatter.format(it.length % 60)}"
-            lengthText.text = lengthString
+            totalTimeText.text = lengthString
             seekBar.max = it.length * 1000
         } ?: run {
-            lengthText.text = "0:00"
+            totalTimeText.text = "0:00"
         }
     }
 
@@ -126,6 +131,10 @@ class PlayerActivity : AbstractActivity(), PlayerView {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item?.itemId) {
+            R.id.youtubeButton -> {
+                startActivity(Intent(this@PlayerActivity, MainActivity::class.java))
+                true
+            }
             R.id.playlistButton -> {
                 PlaylistsDialog.newInstance("Change playlist").apply {
                     onSelectedAction = { MusicQueue.changePlaylist(it.number) }
@@ -160,7 +169,7 @@ class PlayerActivity : AbstractActivity(), PlayerView {
     private fun onPlayerStateChanged(event: StateEvent) {
         var songChanged = false
 
-        if (previousState.song !== event.song) {
+        if (previousState.song?.ytUrl != event.song?.ytUrl) {
             songChanged = true
             updateCurrentSong(event.song)
             val index1 = event.song?.let { MusicQueue.getIndex(it) }

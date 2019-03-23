@@ -13,7 +13,6 @@ import me.kosert.youtubeplayer.network.Network
 import me.kosert.youtubeplayer.network.NetworkResponseEvent
 import me.kosert.youtubeplayer.network.requests.GetInfoRequest
 import me.kosert.youtubeplayer.network.responses.GetInfoResponse
-import me.kosert.youtubeplayer.service.PlayerService
 import me.kosert.youtubeplayer.service.Song
 import me.kosert.youtubeplayer.ui.activities.AbstractActivity
 import me.kosert.youtubeplayer.ui.activities.main.webview.ChromeClient
@@ -25,12 +24,6 @@ class MainActivity : AbstractActivity(), MainActivityCallbacks {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        val intent = Intent(this, PlayerService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            startForegroundService(intent)
-        else
-            startService(intent)
 
         webView.settings.mediaPlaybackRequiresUserGesture = true
         webView.settings.javaScriptEnabled = true
