@@ -10,11 +10,11 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.session.MediaSession
 import android.os.Build
-import android.os.Handler
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
 import android.support.v4.media.app.NotificationCompat.MediaStyle
 import android.view.KeyEvent
+import kotlinx.coroutines.Job
 import me.kosert.channelbus.EventReceiver
 import me.kosert.channelbus.GlobalBus
 import me.kosert.youtubeplayer.GlobalProvider
@@ -28,6 +28,7 @@ import me.kosert.youtubeplayer.receivers.DownloadReceiver
 import me.kosert.youtubeplayer.receivers.HeadsetConnectionReceiver
 import me.kosert.youtubeplayer.ui.activities.player.PlayerActivity
 import me.kosert.youtubeplayer.util.Logger
+import me.kosert.youtubeplayer.util.timerJob
 import java.io.FileInputStream
 
 
@@ -35,7 +36,8 @@ class PlayerService : Service() {
 
     private val receiver by lazy { EventReceiver() }
     private val logger = Logger("PlayerService")
-    private val timeHandler = Handler()
+
+    private var timeJob: Job? = null
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var mediaSession: MediaSession
 
@@ -73,7 +75,7 @@ class PlayerService : Service() {
         //MusicQueue.uninit()
         mediaSession.isActive = false
         unregisterReceiver(headsetReceiver)
-        timeHandler.removeCallbacksAndMessages(null)
+        timeJob?.cancel()
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()
@@ -106,35 +108,31 @@ class PlayerService : Service() {
             subscribe { e: QueueChangedEvent -> updateNotification() }
             subscribe { event: ControlEvent ->
                 logger.i("Control Event: " + event.type)
-                timeHandler.removeCallbacksAndMessages(null)
+                timeJob?.cancel()
                 when (event.type) {
                     OperationType.PLAY -> play()
                     OperationType.PAUSE -> pause()
                     OperationType.STOP -> stop()
                     OperationType.SELECTED -> selectSong(event.index)
-                    OperationType.NEXT -> goNext() //MusicQueue.onNext()
+                    OperationType.NEXT -> goNext()
                     OperationType.PLAYLIST_SWAP -> onSwap()
                 }
 
                 if (event.type == OperationType.PLAY) {
-                    postPlayingTime()
+                    startTimeUpdateJob()
                 }
                 updateNotification()
             }
         }
     }
 
-    private fun postPlayingTime() {
-        mediaPlayer?.let {
-            if (controller.currentSong != GlobalProvider.currentState.song)
-                updateNotification()
-
-            GlobalBus.post(StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition))
+    private fun startTimeUpdateJob() {
+        timeJob?.cancel()
+        timeJob = timerJob {
+            mediaPlayer?.let {
+                GlobalBus.post(StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition))
+            }
         }
-
-        timeHandler.postDelayed({
-            postPlayingTime()
-        }, 500)
     }
 
     private fun play() {
@@ -170,6 +168,7 @@ class PlayerService : Service() {
             setOnPreparedListener {
                 GlobalBus.post(StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition))
                 start()
+                updateNotification()
             }
             prepareAsync()
         }
@@ -204,6 +203,7 @@ class PlayerService : Service() {
             controller.goNext()
             play()
         }
+        updateNotification()
     }
 
     private fun goNext() {

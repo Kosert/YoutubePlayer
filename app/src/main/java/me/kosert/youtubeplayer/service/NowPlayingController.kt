@@ -20,10 +20,10 @@ class NowPlayingController {
 	}
 
 	fun getNext(): Song? {
-        if (currentSong == null) return null
-
-		val currentIndex = getIndex(currentSong!!)
-		return queue.getOrNull(currentIndex + 1)
+        return currentSong?.let {
+            val currentIndex = getIndex(it)
+            queue.getOrNull(currentIndex + 1) ?: queue.firstOrNull()
+        }
 	}
 
     fun selectSong(position: Int) {
