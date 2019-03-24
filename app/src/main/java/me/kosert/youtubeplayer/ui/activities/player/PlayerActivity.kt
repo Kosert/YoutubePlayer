@@ -164,25 +164,25 @@ class PlayerActivity : AbstractActivity(), PlayerView {
         }
     }
 
-    private var previousState: StateEvent = GlobalProvider.currentState
+    private var previousState: StateEvent? = null
 
     private fun onPlayerStateChanged(event: StateEvent) {
         var songChanged = false
 
-        if (previousState.song?.ytUrl != event.song?.ytUrl) {
+        if (previousState == null || previousState?.song?.ytUrl != event.song?.ytUrl) {
             songChanged = true
             updateCurrentSong(event.song)
             val index1 = event.song?.let { MusicQueue.getIndex(it) }
-            val index2 = previousState.song?.let { MusicQueue.getIndex(it) }
+            val index2 = previousState?.song?.let { MusicQueue.getIndex(it) }
             listOfNotNull(index1, index2).forEach {
                 songRecycler.adapter?.notifyItemChanged(it)
             }
         }
 
-        if (previousState.state != event.state) {
+        if (previousState == null || previousState?.state != event.state) {
             updateView(event.state)
             if (!songChanged)
-                (event.song ?: previousState.song)?.let {
+                (event.song ?: previousState?.song)?.let {
                     val index = MusicQueue.getIndex(it)
                     songRecycler.adapter?.notifyItemChanged(index)
                 }
