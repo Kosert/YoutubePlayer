@@ -1,5 +1,6 @@
 package me.kosert.youtubeplayer.ui.activities.player
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.PorterDuff
 import android.os.Bundle
@@ -20,9 +21,11 @@ import me.kosert.youtubeplayer.music.StateEvent
 import me.kosert.youtubeplayer.service.*
 import me.kosert.youtubeplayer.ui.activities.AbstractActivity
 import me.kosert.youtubeplayer.ui.activities.main.MainActivity
+import me.kosert.youtubeplayer.ui.dialogs.EditTextDialog
 import me.kosert.youtubeplayer.ui.dialogs.PlaylistsDialog
 import me.kosert.youtubeplayer.util.toColor
 import java.text.DecimalFormat
+
 
 class PlayerActivity : AbstractActivity(), PlayerView {
 
@@ -141,6 +144,10 @@ class PlayerActivity : AbstractActivity(), PlayerView {
                 }.show(supportFragmentManager, PlaylistsDialog.TAG)
                 true
             }
+            R.id.importButton -> {
+                importFile()
+                true
+            }
             R.id.redownloadButton -> {
                 MusicProvider.checkQueue()
                 true
@@ -190,5 +197,29 @@ class PlayerActivity : AbstractActivity(), PlayerView {
 
         updateCurrentTime(event.millis)
         previousState = event
+    }
+
+    companion object {
+        const val musicFileRequestCode = 2137
+    }
+
+    private fun importFile() {
+        startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "audio/*"
+        }, 2137)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode != musicFileRequestCode || resultCode != Activity.RESULT_OK || data == null)
+            return
+
+        EditTextDialog.newInstance("Song name", "").apply {
+            onStringChosenAction = {
+                val uri = data.data
+                MusicProvider.newSongFromFile(uri, it)
+            }
+        }.show(supportFragmentManager)
     }
 }

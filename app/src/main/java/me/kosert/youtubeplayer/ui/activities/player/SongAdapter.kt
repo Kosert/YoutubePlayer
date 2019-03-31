@@ -4,19 +4,24 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
 import android.support.v4.app.FragmentManager
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.PopupMenu
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.item_song.view.*
 import me.kosert.youtubeplayer.App
 import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.R
+import me.kosert.youtubeplayer.memory.AppData
 import me.kosert.youtubeplayer.music.MusicProvider
 import me.kosert.youtubeplayer.music.MusicQueue
 import me.kosert.youtubeplayer.service.PlayingState
 import me.kosert.youtubeplayer.service.Song
+import me.kosert.youtubeplayer.ui.dialogs.EditTextDialog
 import me.kosert.youtubeplayer.ui.dialogs.PlaylistsDialog
 import java.text.DecimalFormat
 
@@ -105,12 +110,25 @@ class SongAdapter(
                 inflate(R.menu.song_more)
                 setOnMenuItemClickListener {
                     when (it.itemId) {
+                        R.id.rename -> rename()
                         R.id.changePlaylist -> moveToPlaylist()
                         R.id.remove -> remove()
                     }
                     true
                 }
             }.show()
+        }
+
+        private fun rename() {
+            val song = items[adapterPosition]
+
+            EditTextDialog.newInstance("Rename song", song.title).apply {
+                onStringChosenAction = {
+                    song.title = it
+                    notifyItemChanged(adapterPosition)
+                    MusicQueue.saveCurrent()
+                }
+            }.show(fragmentManager)
         }
 
         private fun moveToPlaylist() {
@@ -120,7 +138,6 @@ class SongAdapter(
                     MusicQueue.moveToPlaylist(adapterPosition, it)
                 }
             }.show(fragmentManager, PlaylistsDialog.TAG)
-
         }
 
         private fun remove() {

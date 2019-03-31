@@ -2,6 +2,7 @@ package me.kosert.youtubeplayer.music
 
 import android.app.DownloadManager
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.widget.Toast
 import com.crashlytics.android.Crashlytics
@@ -13,6 +14,7 @@ import me.kosert.youtubeplayer.network.requests.GetInfoRequest
 import me.kosert.youtubeplayer.network.responses.GetInfoResponse
 import me.kosert.youtubeplayer.service.DownloadEvent
 import me.kosert.youtubeplayer.service.Song
+import java.util.concurrent.TimeUnit
 
 object MusicProvider {
 
@@ -23,7 +25,7 @@ object MusicProvider {
     }
 
     fun checkQueue() {
-        val notSaved = MusicQueue.queue.filterNot { isSongSaved(it) }
+        val notSaved = MusicQueue.queue.filterNot { isSongSaved(it) && it.isFromFile() }
         val toDownload = notSaved.take(5)
 
         Toast.makeText(App.get(), "Songs not downloaded: ${notSaved.size}, Song scheduled for download: ${toDownload.size}", Toast.LENGTH_SHORT).show()
@@ -65,6 +67,31 @@ object MusicProvider {
             val id = manager.enqueue(request)
             downloading[id] = song.ytUrl
             GlobalBus.post(DownloadEvent(song.ytUrl))
+        }
+    }
+
+    fun newSongFromFile(uri: Uri, name: String) {
+
+        CoroutineScope(Job() + Dispatchers.Default).launch {
+
+            val allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz-_123456789"
+            val newId = (1..20).map { allowedChars.random() }.joinToString("")
+
+            val duration = MediaMetadataRetriever().run {
+                setDataSource(App.get(), uri)
+                val millis = extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION).toLong()
+                TimeUnit.MILLISECONDS.toSeconds(millis).toInt()
+            }
+
+            val song = Song(name, "fakeUrl=$newId", duration, null)
+
+            App.get().contentResolver.openInputStream(uri).use { input ->
+                song.getMusicFile().outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            MusicQueue.addSong(song)
         }
     }
 }

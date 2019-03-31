@@ -19,6 +19,11 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/importButton"
+        android:title="Import music file"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/redownloadButton"
         android:icon="@drawable/ic_restore_24dp"
         android:title="Check&amp;Restore"

@@ -14,7 +14,7 @@ import java.io.File
 import java.io.FileNotFoundException
 
 class Song(
-        @Expose val title: String,
+        @Expose var title: String,
         @Expose val ytUrl: String,
         @Expose val length: Int,    // in seconds
         /*@Expose*/ val format: Format?
@@ -23,7 +23,11 @@ class Song(
     private fun getVideoId() = ytUrl.split("=")[1].replaceAfter("&", "")
     private fun getImageURL() = "https://i.ytimg.com/vi/${getVideoId()}/hqdefault.jpg"
 
+    fun isFromFile() = ytUrl.startsWith("fakeUrl")
+
     fun getImage(): Bitmap? {
+        if (isFromFile()) return null
+
         return try {
             val inputStream = App.get().openFileInput(getVideoId())
             BitmapFactory.decodeStream(inputStream)
@@ -38,6 +42,8 @@ class Song(
     }
 
     fun downloadImage() {
+        if (isFromFile()) return
+
         Glide.with(App.get())
                 .asBitmap()
                 .load(getImageURL())

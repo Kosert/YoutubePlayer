@@ -57,18 +57,25 @@ class MainActivity : AbstractActivity(), MainActivityCallbacks {
         val request = event.requestMessage as GetInfoRequest
         if (!request.isFromActivity) return
 
-        val response = event.responseMessage as GetInfoResponse
+        val response = event.responseMessage as GetInfoResponse? ?: return
+
+        showProgress(false)
+        webView.goBack()
+
+        if (response.formats == null) {
+            showSnack("ERROR Cannot get video", Snackbar.LENGTH_LONG)
+            return
+        }
+
         val audioFormats = response.formats.filter {
             it.audioEncoding != null && it.audioEncoding != "opus" && it.encoding == null
         }.sortedByDescending { it.audioBitrate?.toInt() }
 
-        showProgress(false)
-        webView.goBack()
         if (audioFormats.isNotEmpty()) {
             val format = audioFormats[0]
             val song = Song(response.title, response.url, response.length, format)
             MusicQueue.addSong(song)
-            showSnack("ADDED TO QUEUE: " + response.title, Snackbar.LENGTH_LONG)
+            showSnack("Added to queue: " + response.title, Snackbar.LENGTH_SHORT)
         } else {
             showSnack("ERROR: No suitable audio format :(", Snackbar.LENGTH_LONG)
         }

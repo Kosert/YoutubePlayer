@@ -7,7 +7,7 @@ class GetInfoResponse(
         @Expose val title: String,
         @Expose val url: String,
         @Expose val length: Int,
-        @Expose val formats: List<Format>,
+        @Expose val formats: List<Format>?,
         @Expose val thumb: String
 ) : AbstractResponseMessage() {
 

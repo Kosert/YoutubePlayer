@@ -109,4 +109,8 @@ object MusicQueue {
         toSwap.forEach { queue.add(it as Song) }
         GlobalBus.post(QueueChangedEvent())
     }
+
+    fun saveCurrent() {
+        AppData.setAny(USER_PLAYLIST, queue.toTypedArray())
+    }
 }
