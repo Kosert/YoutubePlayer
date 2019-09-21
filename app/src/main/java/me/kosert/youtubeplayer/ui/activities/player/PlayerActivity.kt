@@ -14,10 +14,7 @@ import me.kosert.channelbus.GlobalBus
 import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.R
 import me.kosert.youtubeplayer.memory.AppData
-import me.kosert.youtubeplayer.music.MusicProvider
-import me.kosert.youtubeplayer.music.MusicQueue
-import me.kosert.youtubeplayer.music.QueueChangedEvent
-import me.kosert.youtubeplayer.music.StateEvent
+import me.kosert.youtubeplayer.music.*
 import me.kosert.youtubeplayer.service.*
 import me.kosert.youtubeplayer.ui.activities.AbstractActivity
 import me.kosert.youtubeplayer.ui.activities.main.MainActivity
@@ -150,6 +147,10 @@ class PlayerActivity : AbstractActivity(), PlayerView {
             }
             R.id.redownloadButton -> {
                 MusicProvider.checkQueue()
+                true
+            }
+            R.id.export -> {
+                SongExporter.exportQueue()
                 true
             }
             else -> {

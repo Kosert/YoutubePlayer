@@ -20,4 +20,10 @@
         android:icon="@drawable/ic_close_black_24dp"
         android:title="Remove"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/export"
+        android:icon="@drawable/ic_import_export_24dp"
+        android:title="Export file"
+        app:showAsAction="always" />
 </menu>

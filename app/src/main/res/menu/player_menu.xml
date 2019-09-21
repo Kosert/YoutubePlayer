@@ -28,4 +28,10 @@
         android:icon="@drawable/ic_restore_24dp"
         android:title="Check&amp;Restore"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/export"
+        android:icon="@drawable/ic_import_export_24dp"
+        android:title="Export music files"
+        app:showAsAction="never" />
 </menu>

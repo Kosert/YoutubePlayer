@@ -30,6 +30,7 @@ import me.kosert.youtubeplayer.ui.activities.player.PlayerActivity
 import me.kosert.youtubeplayer.util.Logger
 import me.kosert.youtubeplayer.util.timerJob
 import java.io.FileInputStream
+import java.lang.IllegalStateException
 
 
 class PlayerService : Service() {
@@ -130,7 +131,11 @@ class PlayerService : Service() {
         timeJob?.cancel()
         timeJob = timerJob {
             mediaPlayer?.let {
-                GlobalBus.post(StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition))
+                try {
+                    GlobalBus.post(StateEvent(PlayingState.PLAYING, controller.currentSong, it.currentPosition))
+                } catch (ex: IllegalStateException) {
+                    // bad timing :/
+                }
             }
         }
     }

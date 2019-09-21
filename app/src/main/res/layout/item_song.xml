@@ -7,10 +7,10 @@
     android:background="@color/white"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingBottom="8dp"
     android:paddingLeft="8dp"
+    android:paddingTop="8dp"
     android:paddingRight="8dp"
-    android:paddingTop="8dp">
+    android:paddingBottom="8dp">
 
     <TextView
         android:id="@+id/numberText"
@@ -23,7 +23,7 @@
         android:textSize="20sp"
         tools:text="123" />
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -43,15 +43,24 @@
             android:id="@+id/lengthText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/titleText"
             tools:text="3:30" />
-    </LinearLayout>
+
+        <TextView
+            android:id="@+id/timesPlayedText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/titleText"
+            android:layout_alignParentEnd="true"
+            tools:text="@string/played_x_times" />
+    </RelativeLayout>
 
     <ImageView
         android:id="@+id/moreButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:padding="8dp"
         tools:src="@drawable/ic_close_black_24dp" />
 

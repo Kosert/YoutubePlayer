@@ -16,7 +16,7 @@ android {
     }
     buildTypes {
         debug {
-            manifestPlaceholders = [crashlyticsEnabled: false]
+            manifestPlaceholders = [crashlyticsEnabled: true]
             versionNameSuffix = "DEBUG"
         }
         release {
@@ -24,6 +24,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    android {
+        kotlinOptions.freeCompilerArgs += "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi"
     }
 }
 
@@ -38,7 +41,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
     implementation 'com.android.volley:volley:1.1.0'
-    implementation 'com.github.Kosert:ChannelBus:0.2'
+    implementation 'com.github.Kosert:ChannelBus:0.3'
     implementation 'com.google.code.gson:gson:2.8.5'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

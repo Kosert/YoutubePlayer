@@ -17,8 +17,14 @@ class Song(
         @Expose var title: String,
         @Expose val ytUrl: String,
         @Expose val length: Int,    // in seconds
-        /*@Expose*/ val format: Format?
+        /*@Expose*/ val format: Format?,
+        @Expose private var timesPlayed: Long? = 0
 ) {
+
+    fun getTimesPlayed() = timesPlayed ?: 0
+    fun onPlayed() {
+        timesPlayed = getTimesPlayed() + 1
+    }
 
     private fun getVideoId() = ytUrl.split("=")[1].replaceAfter("&", "")
     private fun getImageURL() = "https://i.ytimg.com/vi/${getVideoId()}/hqdefault.jpg"
@@ -57,6 +63,6 @@ class Song(
     }
 
     override fun toString(): String {
-        return "Song(title='$title', ytUrl='$ytUrl', length=$length)"
+        return "Song(title='$title', ytUrl='$ytUrl', length=$length, timesPlayed=$timesPlayed)"
     }
 }

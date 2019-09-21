@@ -19,6 +19,7 @@ import me.kosert.youtubeplayer.R
 import me.kosert.youtubeplayer.memory.AppData
 import me.kosert.youtubeplayer.music.MusicProvider
 import me.kosert.youtubeplayer.music.MusicQueue
+import me.kosert.youtubeplayer.music.SongExporter
 import me.kosert.youtubeplayer.service.PlayingState
 import me.kosert.youtubeplayer.service.Song
 import me.kosert.youtubeplayer.ui.dialogs.EditTextDialog
@@ -51,6 +52,7 @@ class SongAdapter(
         val numberTextView = v.numberText
         val titleTextView = v.titleText
         val lengthTextView = v.lengthText
+        val timesPlayedTextView = v.timesPlayedText
         val moreButton = v.moreButton
 
         fun bind(position: Int) {
@@ -76,6 +78,7 @@ class SongAdapter(
 
             numberTextView.text = (position + 1).toString()
             titleTextView.text = song.title
+            timesPlayedTextView.text = App.get().getString(R.string.played_x_times, song.getTimesPlayed())
 
             when {
                 MusicProvider.downloading.containsValue(song.ytUrl) -> {
@@ -113,6 +116,7 @@ class SongAdapter(
                         R.id.rename -> rename()
                         R.id.changePlaylist -> moveToPlaylist()
                         R.id.remove -> remove()
+                        R.id.export -> SongExporter.exportSong(song)
                     }
                     true
                 }
