@@ -8,12 +8,10 @@ import android.graphics.drawable.BitmapDrawable
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.media.session.MediaSession
 import android.os.Build
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
 import android.support.v4.media.app.NotificationCompat.MediaStyle
-import android.view.KeyEvent
 import kotlinx.coroutines.Job
 import me.kosert.channelbus.EventReceiver
 import me.kosert.channelbus.GlobalBus
@@ -30,7 +28,6 @@ import me.kosert.youtubeplayer.ui.activities.player.PlayerActivity
 import me.kosert.youtubeplayer.util.Logger
 import me.kosert.youtubeplayer.util.timerJob
 import java.io.FileInputStream
-import java.lang.IllegalStateException
 
 
 class PlayerService : Service() {
@@ -40,11 +37,11 @@ class PlayerService : Service() {
 
     private var timeJob: Job? = null
     private var mediaPlayer: MediaPlayer? = null
-    private lateinit var mediaSession: MediaSession
 
     private val headsetReceiver by lazy { HeadsetConnectionReceiver() }
     private val downloadReceiver by lazy { DownloadReceiver() }
 
+    private val mediaSessionController = MediaSessionController(this)
     private val controller = NowPlayingController()
 
     private fun getCurrentPlayingState() = GlobalProvider.currentState.state
@@ -57,10 +54,32 @@ class PlayerService : Service() {
         registerReceiver(downloadReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         registerReceiver(headsetReceiver, IntentFilter(AudioManager.ACTION_HEADSET_PLUG))
 
+        mediaSessionController.initialize()
         setEventCallbacks()
         startForeground(ONGOING_NOTIFICATION_ID, createNotification(getCurrentPlayingState()))
     }
 
+    private fun setEventCallbacks() {
+        receiver.subscribe { e: QueueChangedEvent ->
+            updateNotification()
+        }.subscribe { event: ControlEvent ->
+            logger.i("Control Event: " + event.type)
+            timeJob?.cancel()
+            when (event.type) {
+                OperationType.PLAY -> play()
+                OperationType.PAUSE -> pause()
+                OperationType.STOP -> stop()
+                OperationType.SELECTED -> selectSong(event.index)
+                OperationType.NEXT -> goNext()
+                OperationType.PLAYLIST_SWAP -> onSwap()
+            }
+
+            if (event.type == OperationType.PLAY) {
+                startTimeUpdateJob()
+            }
+            updateNotification()
+        }
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         logger.i("onStartCommand")
@@ -71,10 +90,8 @@ class PlayerService : Service() {
         super.onDestroy()
         logger.i("Destroying")
         receiver.unsubscribeAll()
+        mediaSessionController.uninitialize()
         unregisterReceiver(downloadReceiver)
-
-        //MusicQueue.uninit()
-        mediaSession.isActive = false
         unregisterReceiver(headsetReceiver)
         timeJob?.cancel()
 
@@ -83,47 +100,6 @@ class PlayerService : Service() {
 
         mediaPlayer?.apply {
             release()
-        }
-    }
-
-    private fun setEventCallbacks() {
-        mediaSession = MediaSession(this, "PlayerService")
-        mediaSession.setCallback(object : MediaSession.Callback() {
-            override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
-
-                val keyEvent = mediaButtonIntent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
-                if (keyEvent.action != KeyEvent.ACTION_DOWN) return true
-
-                logger.i("Media button pressed")
-                if (GlobalProvider.currentState.state == PlayingState.PLAYING)
-                    GlobalBus.post(ControlEvent(OperationType.PAUSE))
-                else
-                    GlobalBus.post(ControlEvent(OperationType.PLAY))
-
-                return true
-            }
-        })
-        mediaSession.isActive = true
-
-        receiver.apply {
-            subscribe { e: QueueChangedEvent -> updateNotification() }
-            subscribe { event: ControlEvent ->
-                logger.i("Control Event: " + event.type)
-                timeJob?.cancel()
-                when (event.type) {
-                    OperationType.PLAY -> play()
-                    OperationType.PAUSE -> pause()
-                    OperationType.STOP -> stop()
-                    OperationType.SELECTED -> selectSong(event.index)
-                    OperationType.NEXT -> goNext()
-                    OperationType.PLAYLIST_SWAP -> onSwap()
-                }
-
-                if (event.type == OperationType.PLAY) {
-                    startTimeUpdateJob()
-                }
-                updateNotification()
-            }
         }
     }
 
