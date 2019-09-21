@@ -25,7 +25,7 @@ object MusicProvider {
     }
 
     fun checkQueue() {
-        val notSaved = MusicQueue.queue.filterNot { isSongSaved(it) && it.isFromFile() }
+        val notSaved = MusicQueue.queue.filterNot { isSongSaved(it) || it.isFromFile() }
         val toDownload = notSaved.take(5)
 
         Toast.makeText(App.get(), "Songs not downloaded: ${notSaved.size}, Song scheduled for download: ${toDownload.size}", Toast.LENGTH_SHORT).show()
@@ -53,7 +53,9 @@ object MusicProvider {
             }
             if (format == null) {
                 Crashlytics.logException(IllegalArgumentException("No valid format for video: ${song.ytUrl}"))
-                Toast.makeText(App.get(), "ERROR: No suitable audio format :(", Toast.LENGTH_LONG).show()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(App.get(), "ERROR: No suitable audio format :(", Toast.LENGTH_LONG).show()
+                }
                 return@launch
             }
 

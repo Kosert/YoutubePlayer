@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.activity_player.*
 import me.kosert.channelbus.GlobalBus
 import me.kosert.youtubeplayer.GlobalProvider
 import me.kosert.youtubeplayer.R
+import me.kosert.youtubeplayer.backup.SongExporter
 import me.kosert.youtubeplayer.memory.AppData
 import me.kosert.youtubeplayer.music.*
 import me.kosert.youtubeplayer.service.*
@@ -153,9 +154,15 @@ class PlayerActivity : AbstractActivity(), PlayerView {
                 SongExporter.exportQueue()
                 true
             }
-            else -> {
-                super.onOptionsItemSelected(item)
+            R.id.backupAll -> {
+                SongExporter.backupAll()
+                true
             }
+            R.id.restoreAll -> {
+                SongExporter.restoreBackup()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 

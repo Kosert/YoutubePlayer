@@ -34,4 +34,16 @@
         android:icon="@drawable/ic_import_export_24dp"
         android:title="Export music files"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/backupAll"
+        android:icon="@drawable/ic_import_export_24dp"
+        android:title="Backup All Data"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/restoreAll"
+        android:icon="@drawable/ic_import_export_24dp"
+        android:title="Restore Backed up data"
+        app:showAsAction="never" />
 </menu>

@@ -36,7 +36,6 @@ object MusicQueue {
     }
 
     fun removeSong(position: Int) {
-
         val removed = queue.removeAt(position)
         AppData.setAny(USER_PLAYLIST, queue.toTypedArray())
 

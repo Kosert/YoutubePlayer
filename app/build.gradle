@@ -5,6 +5,14 @@ apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android-extensions'
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('D:\\AndroidStudioProjects\\keys\\ytPlayer.jks')
+            keyAlias = 'ytplayer'
+            storePassword 'Z5W49YDwfAhWPKJb'
+            keyPassword 'Z5W49YDwfAhWPKJb'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "me.kosert.youtubeplayer"
